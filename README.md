@@ -82,3 +82,14 @@ Incluye:
 - Visualización de tareas en **ListView**.
 - **Colores según prioridad** para tareas.
 - **Íconos para diferenciar recordatorios**.
+
+- ## Guía de uso del proyecto en JAVA
+- A continuación se explicara como hacer uso correcto del programa:
+
+- 1 - Ingresar al link proporcionado mediante el envio del entregable 1.
+- 2 - Copiar el link del repositorio y clonarlo a través de la terminal o por medio de Git.
+- 3 - Al momento de abrir el proyecto en IntelliJ IDEA es necesario hacer uso del OpenJDK 17.0.12.
+- 3 - Por medio del uso de graddle realizar la construcción del ejecutable del programa.
+- 4 - Usar graddle run para ejecutar el archivo ejecutable del programa, esto permitira ver el funcionamiento.
+- 5 - El programa no pide la entrada de datos al usuario, ya que el programa funciona usando datos predefinidos por los desarrolladores.
+- 6 - Una vez terminado de usar el programa solo es necesario salir del proyecto.
