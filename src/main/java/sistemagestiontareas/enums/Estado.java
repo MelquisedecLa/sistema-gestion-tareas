@@ -1,4 +1,8 @@
 package sistemagestiontareas.enums;
 
-public class Estado {
+public enum Estado {
+    PENDIENTE,
+    EN_PROGRESO,
+    COMPLETADA,
+    CANCELADA
 }
