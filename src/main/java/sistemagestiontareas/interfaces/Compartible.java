@@ -1,4 +1,5 @@
 package sistemagestiontareas.interfaces;
 
-public class Compartible {
+public interface Compartible {
+    void compartirCon(String usuarioId);
 }
