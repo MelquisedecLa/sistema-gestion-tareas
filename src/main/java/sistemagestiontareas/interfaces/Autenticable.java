@@ -1,6 +1,6 @@
 package sistemagestiontareas.interfaces;
 
 public interface Autenticable {
-    boolean iniciarSesion(String usuario, String contrasena);
+    boolean iniciarSesion(String usuario, String clave);
     void cerrarSesion();
 }

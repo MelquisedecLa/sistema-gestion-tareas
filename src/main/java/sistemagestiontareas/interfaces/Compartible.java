@@ -1,5 +1,5 @@
 package sistemagestiontareas.interfaces;
 
 public interface Compartible {
-    void compartirCon(String usuarioId);
+    void compartirCon(String usuarioID);
 }
