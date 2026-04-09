@@ -84,6 +84,7 @@ Incluye:
 - **Íconos para diferenciar recordatorios**.
 
 - ## Guía de uso del proyecto en JAVA
+
 - A continuación se explicara como hacer uso correcto del programa:
 
 - 1 - Ingresar al link proporcionado mediante el envio del entregable 1.
