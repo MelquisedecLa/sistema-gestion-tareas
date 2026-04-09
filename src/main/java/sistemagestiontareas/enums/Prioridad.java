@@ -1,4 +1,7 @@
 package sistemagestiontareas.enums;
 
-public class Prioridad {
+public enum Prioridad {
+    ALTA,
+    MEDIA,
+    BAJA
 }

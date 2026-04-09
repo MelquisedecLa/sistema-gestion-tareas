@@ -1,5 +1,7 @@
 package sistemagestiontareas.interfaces;
 
+import sistemagestiontareas.model.Usuario;
+
 public interface Compartible {
-    void compartirCon(String usuarioID);
+    void compartir(Usuario usuario);
 }
