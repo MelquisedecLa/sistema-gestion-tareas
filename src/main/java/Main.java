@@ -1,5 +1,3 @@
-package sistemagestiontareas.programa;
-
 import sistemagestiontareas.enums.Estado;
 import sistemagestiontareas.enums.Prioridad;
 import sistemagestiontareas.model.Recordatorio;
