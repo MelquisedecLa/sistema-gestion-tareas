@@ -26,9 +26,12 @@ public class UsuarioPremium extends Usuario {
     }
 
     /**
-     * Simula la creación de un elemento sin restricciones.
+     * Permite crear elementos sin restricciones.
+     *
+     * @param elemento elemento que será agregado
      */
-    public void crearElemento() {
-        System.out.println("Usuario premium crea elemento sin restricciones.");
+    public void crearElemento(Elemento elemento) {
+        agregarElemento(elemento);
+        System.out.println("Elemento creado por usuario premium.");
     }
 }

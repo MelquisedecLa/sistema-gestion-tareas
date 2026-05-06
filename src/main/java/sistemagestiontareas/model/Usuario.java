@@ -1,17 +1,24 @@
 package sistemagestiontareas.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import sistemagestiontareas.interfaces.Autenticable;
+
 /**
  * Clase que representa un usuario del sistema.
  */
-public class Usuario {
+public class Usuario implements Autenticable {
 
     private int id;
     private String nombre;
     private String email;
     private String password;
+    private List<Elemento> elementos;
 
-    /** Constructor vacío */
-    public Usuario() {}
+    /** Constructor vacío. */
+    public Usuario() {
+        this.elementos = new ArrayList<>();
+    }
 
     /**
      * Constructor con parámetros.
@@ -26,44 +33,68 @@ public class Usuario {
         this.id = id;
         this.email = email;
         this.password = password;
+        this.elementos = new ArrayList<>();
     }
 
-    /** @return correo electrónico del usuario */
+    @Override
+    public boolean iniciarSesion(String email, String clave) {
+        return this.email.equals(email) && this.password.equals(clave);
+    }
+
+    @Override
+    public void cerrarSesion() {
+        System.out.println("Sesión cerrada para: " + nombre);
+    }
+
+    public void agregarElemento(Elemento elemento) {
+        if (elemento != null) {
+            elementos.add(elemento);
+            System.out.println("Elemento agregado al usuario: " + nombre);
+        }
+    }
+
+    public void mostrarElementos() {
+        System.out.println("Elementos de " + nombre + ":");
+
+        for (Elemento elemento : elementos) {
+            elemento.mostrarInfo();
+            System.out.println("-------------------");
+        }
+    }
+
+    public List<Elemento> getElementos() {
+        return elementos;
+    }
+
     public String getEmail() {
         return email;
     }
 
-    /** @param email nuevo correo electrónico */
     public void setEmail(String email) {
         this.email = email;
     }
 
-    /** @return id del usuario */
     public int getId() {
         return id;
     }
 
-    /** @param id nuevo id del usuario */
     public void setId(int id) {
         this.id = id;
     }
 
-    /** @return nombre del usuario */
+
     public String getNombre() {
         return nombre;
     }
 
-    /** @param nombre nuevo nombre del usuario */
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
-    /** @return contraseña del usuario */
     public String getPassword() {
         return password;
     }
 
-    /** @param password nueva contraseña */
     public void setPassword(String password) {
         this.password = password;
     }
