@@ -50,7 +50,7 @@ public class Main {
                         "Entrega del proyecto",
                         "Subir el primer entregable al repositorio",
                         Prioridad.MEDIA,
-                        LocalDate.of(2026, 4, 14));
+                        LocalDate.of(2026, 4, 10));
 
         usuarioClasico.crearElemento(tarea);
         usuarioPremium.crearElemento(recordatorio);
@@ -67,9 +67,10 @@ public class Main {
         recordatorio.reprogramarFecha(LocalDate.of(2026, 4, 16));
         recordatorio.mostrarInfo();
 
+        // Punto 3 — compartirElemento() se llama desde el usuario, no desde el elemento
         System.out.println("\nCOMPARTIR ELEMENTOS");
-        tarea.compartir(usuarioPremium);
-        recordatorio.compartir(usuarioClasico);
+        usuarioClasico.compartirElemento(tarea, usuarioPremium);
+        usuarioPremium.compartirElemento(recordatorio, usuarioClasico);
 
         System.out.println("\nPOLIMORFISMO");
 
