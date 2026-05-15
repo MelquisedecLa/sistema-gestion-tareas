@@ -1,15 +1,21 @@
 package sistemagestiontareas.model;
 
+import sistemagestiontareas.patterns.EstrategiaClasica;
+
 /**
  * Representa a un usuario clásico dentro del sistema.
- * Tiene un límite máximo de elementos que puede crear.
+ * Tiene un límite máximo de elementos y nivel de acceso básico.
  */
 public class UsuarioClasico extends Usuario {
 
-    private static final int LIMITE_ELEMENTOS = 3;
+    private int limiteElementos;
+    private String nivelAcceso;
 
     public UsuarioClasico(String nombre, int id, String email, String password) {
         super(nombre, id, email, password);
+        this.limiteElementos = 3;
+        this.nivelAcceso = "BASICO";
+        setEstrategia(new EstrategiaClasica());
     }
 
     /**
@@ -18,21 +24,12 @@ public class UsuarioClasico extends Usuario {
      * @return true si no ha alcanzado el límite
      */
     public boolean verificarLimiteTareas() {
-        return getElementos().size() < LIMITE_ELEMENTOS;
+        return getElementos().size() < limiteElementos;
     }
 
-    /**
-     * Crea un elemento si no se ha alcanzado el límite permitido.
-     *
-     * @param elemento elemento a crear
-     */
-    @Override
-    public void crearElemento(Elemento elemento) {
-        if (verificarLimiteTareas()) {
-            agregarElemento(elemento);
-            System.out.println("Elemento creado por usuario clásico.");
-        } else {
-            System.out.println("El usuario clásico alcanzó el límite de elementos.");
-        }
-    }
+    /** @return límite de elementos permitidos */
+    public int getLimiteElementos() { return limiteElementos; }
+
+    /** @return nivel de acceso del usuario */
+    public String getNivelAcceso() { return nivelAcceso; }
 }

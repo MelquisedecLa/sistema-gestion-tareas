@@ -3,10 +3,11 @@ package sistemagestiontareas.model;
 import java.util.ArrayList;
 import java.util.List;
 import sistemagestiontareas.interfaces.Autenticable;
+import sistemagestiontareas.patterns.EstrategiaCreacion;
 
 /**
  * Clase abstracta que representa un usuario del sistema.
- * Solo puede instanciarse a través de UsuarioClasico o UsuarioPremium.
+ * Usa el patrón Strategy para delegar la lógica de creación de elementos.
  */
 public abstract class Usuario implements Autenticable {
 
@@ -15,10 +16,13 @@ public abstract class Usuario implements Autenticable {
     private String email;
     private String password;
     private List<Elemento> elementos;
+    private EstrategiaCreacion estrategia;
+    private ValidadorCorreo validador;
 
     /** Constructor vacío. */
     public Usuario() {
         this.elementos = new ArrayList<>();
+        this.validador = new ValidadorCorreo();
     }
 
     /**
@@ -30,6 +34,10 @@ public abstract class Usuario implements Autenticable {
      * @param password contraseña del usuario
      */
     public Usuario(String nombre, int id, String email, String password) {
+        this.validador = new ValidadorCorreo();
+        if (!validador.validarFormato(email) || !validador.validarDominio(email)) {
+            throw new IllegalArgumentException("El correo no es válido: " + email);
+        }
         this.nombre = nombre;
         this.id = id;
         this.email = email;
@@ -48,12 +56,20 @@ public abstract class Usuario implements Autenticable {
     }
 
     /**
-     * Crea un elemento y lo agrega al usuario.
-     * Cada subclase define sus propias restricciones.
+     * Crea un elemento delegando la lógica a la estrategia asignada.
      *
      * @param elemento elemento a crear
      */
-    public abstract void crearElemento(Elemento elemento);
+    public void crearElemento(Elemento elemento) {
+        if (estrategia == null) {
+            System.out.println("No hay estrategia asignada para: " + nombre);
+            return;
+        }
+        boolean creado = estrategia.crearElemento(elemento, elementos);
+        if (creado) {
+            agregarElemento(elemento);
+        }
+    }
 
     /**
      * Agrega un elemento a la lista del usuario.
@@ -78,52 +94,50 @@ public abstract class Usuario implements Autenticable {
         }
     }
 
-    /** @return lista de elementos del usuario */
-    public List<Elemento> getElementos() {
-        return elementos;
-    }
-
-    /** @return id del usuario */
-    public int getId() {
-        return id;
-    }
-
-    /** @param id nuevo id */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    /** @return nombre del usuario */
-    public String getNombre() {
-        return nombre;
-    }
-
-    /** @param nombre nuevo nombre */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    /** @return email del usuario */
-    public String getEmail() {
-        return email;
-    }
-
-    /** @param email nuevo email */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /** @return contraseña del usuario */
-    public String getPassword() {
-        return password;
-    }
-
-    /** @param password nueva contraseña */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
+    /**
+     * Comparte un elemento con otro usuario.
+     *
+     * @param elemento elemento a compartir
+     * @param usuario  usuario destino
+     */
     public void compartirElemento(Elemento elemento, Usuario usuario) {
         elemento.compartir(usuario);
     }
+
+    /** @param estrategia nueva estrategia a asignar */
+    public void setEstrategia(EstrategiaCreacion estrategia) {
+        this.estrategia = estrategia;
+    }
+
+    /** @return estrategia actual */
+    public EstrategiaCreacion getEstrategia() {
+        return estrategia;
+    }
+
+    /** @return lista de elementos */
+    public List<Elemento> getElementos() { return elementos; }
+
+    /** @return id del usuario */
+    public int getId() { return id; }
+
+    /** @param id nuevo id */
+    public void setId(int id) { this.id = id; }
+
+    /** @return nombre del usuario */
+    public String getNombre() { return nombre; }
+
+    /** @param nombre nuevo nombre */
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
+    /** @return email del usuario */
+    public String getEmail() { return email; }
+
+    /** @param email nuevo email */
+    public void setEmail(String email) { this.email = email; }
+
+    /** @return contraseña del usuario */
+    public String getPassword() { return password; }
+
+    /** @param password nueva contraseña */
+    public void setPassword(String password) { this.password = password; }
 }
