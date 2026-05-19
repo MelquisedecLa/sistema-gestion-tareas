@@ -87,7 +87,6 @@ public abstract class Elemento implements Compartible {
     @Override
     public void compartir(Usuario usuario) {
         if (usuario != null) {
-            usuariosCompartidos.add(usuario);
             System.out.println("Elemento compartido con: " + usuario.getNombre());
         }
     }
@@ -100,7 +99,13 @@ public abstract class Elemento implements Compartible {
         System.out.println("Título: " + titulo);
         System.out.println("Descripción: " + descripcion);
         System.out.println("Prioridad: " + prioridad);
-        System.out.println(
-                "Cantidad de usuarios compartidos: " + usuariosCompartidos.size());
+        if (usuariosCompartidos.isEmpty()) {
+            System.out.println("No compartido con nadie.");
+        } else {
+            System.out.println("Compartido por/con:");
+            for (Usuario u : usuariosCompartidos) {
+                System.out.println("  - " + u.getNombre() + " (" + u.getEmail() + ")");
+            }
+        }
     }
 }

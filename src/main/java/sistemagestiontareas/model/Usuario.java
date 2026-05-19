@@ -79,7 +79,6 @@ public abstract class Usuario implements Autenticable {
     public void agregarElemento(Elemento elemento) {
         if (elemento != null) {
             elementos.add(elemento);
-            System.out.println("Elemento agregado al usuario: " + nombre);
         }
     }
 
@@ -97,7 +96,7 @@ public abstract class Usuario implements Autenticable {
     /**
      * Comparte un elemento con otro usuario.
      *
-     * @param elemento elemento a compartir
+     * @param elemento elemento as compartir
      * @param usuario  usuario destino
      */
     public void compartirElemento(Elemento elemento, Usuario usuario) {

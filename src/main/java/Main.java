@@ -34,7 +34,9 @@ public class Main {
             switch (opcion) {
                 case 1 -> registrarUsuario();
                 case 2 -> iniciarSesion();
-                case 3 -> { if (verificarSesion()) menuUsuario(); }
+                case 3 -> {
+                    if (verificarSesion()) menuUsuario();
+                }
                 case 0 -> System.out.println("Saliendo del sistema...");
                 default -> System.out.println("Opcion invalida.");
             }
@@ -134,7 +136,7 @@ public class Main {
                 System.out.println("Usuario clasico registrado correctamente.");
             } else {
 // Pedir método de pago para usuario premium
-                  System.out.println("Metodo de pago:");
+                System.out.println("Metodo de pago:");
                 System.out.println("1. Tarjeta de credito");
                 System.out.println("2. Tarjeta de debito");
                 System.out.println("3. PayPal");
@@ -304,7 +306,12 @@ public class Main {
 
         if (idxElemento >= 0 && idxElemento < elementos.size()
                 && idxUsuario >= 0 && idxUsuario < otros.size()) {
-            usuarioActual.compartirElemento(elementos.get(idxElemento), otros.get(idxUsuario));
+            Elemento elementoACompartir = elementos.get(idxElemento);
+            Usuario usuarioDestino = otros.get(idxUsuario);
+            usuarioActual.compartirElemento(elementoACompartir, usuarioDestino);
+            elementoACompartir.getUsuariosCompartidos().add(usuarioActual);
+            usuarioDestino.agregarElemento(elementoACompartir);
+            System.out.println("Elemento agregado a la lista de " + usuarioDestino.getNombre());
         } else {
             System.out.println("Seleccion invalida.");
         }
@@ -401,12 +408,17 @@ public class Main {
 
     static LocalDate leerFecha(String etiqueta) {
         while (true) {
-            LocalDate fecha = LocalDate.parse(scanner.nextLine());
-            if (fecha.isBefore(LocalDate.now())) {
-                System.out.println("La fecha no puede ser en el pasado.");
-                continue;
+            System.out.print(etiqueta + " (YYYY-MM-DD): ");
+            try {
+                LocalDate fecha = LocalDate.parse(scanner.nextLine());
+                if (fecha.isBefore(LocalDate.now())) {
+                    System.out.println("La fecha no puede ser en el pasado.");
+                    continue;
+                }
+                return fecha;
+            } catch (DateTimeParseException e) {
+                System.out.println("Formato invalido. Usa YYYY-MM-DD.");
             }
-            return fecha;
         }
     }
 }
