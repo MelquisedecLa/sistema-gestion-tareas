@@ -10,7 +10,6 @@ import java.time.LocalDate;
 public class Tarea extends Elemento {
 
     private Estado estado;
-    private LocalDate fechaLimite;
 
     /**
      * Constructor de la clase Tarea.
@@ -24,9 +23,8 @@ public class Tarea extends Elemento {
      */
     public Tarea(int id, String titulo, String descripcion,
                  Prioridad prioridad, Estado estado, LocalDate fechaLimite) {
-        super(id, titulo, descripcion, prioridad);
+        super(id, titulo, descripcion, prioridad, fechaLimite);
         this.estado = estado;
-        this.fechaLimite = fechaLimite;
     }
 
     /** @return estado actual de la tarea */
@@ -35,11 +33,7 @@ public class Tarea extends Elemento {
     /** @param estado nuevo estado */
     public void setEstado(Estado estado) { this.estado = estado; }
 
-    /** @return fecha límite de la tarea */
-    public LocalDate getFechaLimite() { return fechaLimite; }
 
-    /** @param fechaLimite nueva fecha límite */
-    public void setFechaLimite(LocalDate fechaLimite) { this.fechaLimite = fechaLimite; }
 
     /**
      * Cambia el estado de la tarea.
@@ -55,6 +49,6 @@ public class Tarea extends Elemento {
     public void mostrarInfo() {
         super.mostrarInfo();
         System.out.println("Estado: " + estado);
-        System.out.println("Fecha límite: " + fechaLimite);
+        System.out.println("Fecha límite: " + getFechaLimite());
     }
 }

@@ -9,6 +9,12 @@ import sistemagestiontareas.model.UsuarioPremium;
 import sistemagestiontareas.model.ValidadorCorreo;
 import sistemagestiontareas.thread.GestorTareasThread;
 
+//Strategy
+import sistemagestiontareas.patterns.FormaPago;
+import sistemagestiontareas.patterns.TarjetaCredito;
+import sistemagestiontareas.patterns.TarjetaDebito;
+import sistemagestiontareas.patterns.Paypal;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -43,7 +49,7 @@ public class Main {
         } while (opcion != 0);
     }
 
-    //  Menús
+    // Menús
 
     static void mostrarMenuPrincipal() {
         System.out.println("\n--- MENU PRINCIPAL ---");
@@ -97,7 +103,6 @@ public class Main {
             nombre = scanner.nextLine();
         }
 
-        // Validar formato y dominio del correo
         String email = "";
         while (true) {
             System.out.print("Email: ");
@@ -106,7 +111,6 @@ public class Main {
                 System.out.println("Correo invalido. Debe contener '@' y un dominio valido.");
                 continue;
             }
-            // Validar que el correo no esté registrado
             if (correoYaRegistrado(email)) {
                 System.out.println("Este correo ya esta registrado. Usa uno diferente.");
                 continue;
@@ -131,26 +135,30 @@ public class Main {
 
         try {
             if (tipo == 1) {
+                // DIAGRAMA: Clase "UsuarioClasico"
+                // No necesita forma de pago, solo tiene limiteElementos
                 Usuario nuevo = new UsuarioClasico(nombre, id, email, password);
                 usuarios.add(nuevo);
                 System.out.println("Usuario clasico registrado correctamente.");
+
             } else {
-// Pedir método de pago para usuario premium
+                // DIAGRAMA: Clase "UsuarioPremium"
+                // Tiene fechaExpiracion y verificarMembresia() como atributos únicos
+
+                // DIAGRAMA: Patrón Strategy — "FormaPago"
+                // El usuario elige entre TarjetaCredito, TarjetaDebito o Paypal
                 System.out.println("Metodo de pago:");
                 System.out.println("1. Tarjeta de credito");
                 System.out.println("2. Tarjeta de debito");
                 System.out.println("3. PayPal");
                 System.out.print("Opcion: ");
-                String metodoPago = switch (leerInt()) {
-                    case 1 -> "Tarjeta de credito";
-                    case 2 -> "Tarjeta de debito";
-                    case 3 -> "PayPal";
-                    default -> "No especificado";
-                };
+                int opcionPago = leerInt();
 
-                String pagoCompleto;
+                // DIAGRAMA: FormaPago es la interfaz, aquí se decide qué clase concreta usar
+                FormaPago metodoPago = null;
 
-                if (metodoPago.equals("PayPal")) {
+                if (opcionPago == 3) {
+                    // DIAGRAMA: Clase "Paypal" — implementa FormaPago con email y contrasena
                     System.out.print("Correo de PayPal: ");
                     String correoPaypal = scanner.nextLine();
                     while (!validador.validarFormato(correoPaypal) || !validador.validarDominio(correoPaypal)) {
@@ -158,9 +166,12 @@ public class Main {
                         System.out.print("Correo de PayPal: ");
                         correoPaypal = scanner.nextLine();
                     }
-                    pagoCompleto = "PayPal (" + correoPaypal + ")";
+                    System.out.print("Contrasena de PayPal: ");
+                    String contrasenaPaypal = scanner.nextLine();
+                    metodoPago = new Paypal(correoPaypal, contrasenaPaypal);
+
                 } else {
-                    // Validar 16 dígitos
+                    // DIAGRAMA: Clases "TarjetaCredito" y "TarjetaDebito" — implementan FormaPago
                     String numeroTarjeta = "";
                     while (true) {
                         System.out.print("Numero de tarjeta (16 digitos): ");
@@ -169,24 +180,15 @@ public class Main {
                         System.out.println("Numero invalido. Debe tener exactamente 16 digitos.");
                     }
 
-                    // Validar CVC
-                    String cvc = "";
-                    while (true) {
-                        System.out.print("CVC (3 digitos): ");
-                        cvc = scanner.nextLine().trim();
-                        if (cvc.matches("\\d{3}")) break;
-                        System.out.println("CVC invalido. Debe tener exactamente 3 digitos.");
-                    }
-
-                    // Validar fecha de vencimiento
-                    String fechaVencimiento = "";
+                    LocalDate fechaVencimientoTarjeta = null;
                     while (true) {
                         System.out.print("Fecha de vencimiento (MM/YY): ");
-                        fechaVencimiento = scanner.nextLine().trim();
-                        if (fechaVencimiento.matches("(0[1-9]|1[0-2])/\\d{2}")) {
-                            int mes = Integer.parseInt(fechaVencimiento.split("/")[0]);
-                            int anio = 2000 + Integer.parseInt(fechaVencimiento.split("/")[1]);
-                            if (LocalDate.of(anio, mes, 1).isBefore(LocalDate.now())) {
+                        String fechaStr = scanner.nextLine().trim();
+                        if (fechaStr.matches("(0[1-9]|1[0-2])/\\d{2}")) {
+                            int mes = Integer.parseInt(fechaStr.split("/")[0]);
+                            int anio = 2000 + Integer.parseInt(fechaStr.split("/")[1]);
+                            fechaVencimientoTarjeta = LocalDate.of(anio, mes, 1);
+                            if (fechaVencimientoTarjeta.isBefore(LocalDate.now())) {
                                 System.out.println("La tarjeta esta vencida.");
                                 continue;
                             }
@@ -195,26 +197,48 @@ public class Main {
                         System.out.println("Formato invalido. Usa MM/YY, ejemplo: 08/27");
                     }
 
-                    pagoCompleto = metodoPago + " (*" + numeroTarjeta.substring(12) +
-                            " | CVC: ***" + " | Vence: " + fechaVencimiento + ")";
+                    System.out.print("Nombre del titular: ");
+                    String titular = scanner.nextLine();
+
+                    int cvv = 0;
+                    while (true) {
+                        System.out.print("CVV (3 digitos): ");
+                        String cvvStr = scanner.nextLine().trim();
+                        if (cvvStr.matches("\\d{3}")) {
+                            cvv = Integer.parseInt(cvvStr);
+                            break;
+                        }
+                        System.out.println("CVV invalido. Debe tener exactamente 3 digitos.");
+                    }
+
+                    if (opcionPago == 1) {
+                        // TarjetaCredito implementa FormaPago
+                        metodoPago = new TarjetaCredito(numeroTarjeta, fechaVencimientoTarjeta, titular, cvv);
+                        System.out.println("Tarjeta de credito registrada.");
+                    } else {
+                        // TarjetaDebito implementa FormaPago
+                        metodoPago = new TarjetaDebito(numeroTarjeta, fechaVencimientoTarjeta, titular, cvv);
+                        System.out.println("Tarjeta de debito registrada.");
+                    }
                 }
 
-                Usuario nuevo = new UsuarioPremium(nombre, id, email, password, pagoCompleto);
+                // UsuarioPremium tiene fechaExpiracion: LocalDate
+                // Se asigna un mes desde hoy como membresía mensual
+                LocalDate fechaExpiracion = LocalDate.now().plusMonths(1);
+
+                Usuario nuevo = new UsuarioPremium(nombre, id, email, password, fechaExpiracion);
+
+                nuevo.setMetodoPago(metodoPago);
+
                 usuarios.add(nuevo);
                 System.out.println("Usuario premium registrado correctamente.");
-                System.out.println("Metodo de pago registrado: " + pagoCompleto);
+                System.out.println("Membresia valida hasta: " + fechaExpiracion);
             }
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    /**
-     * Verifica si un correo ya está registrado en el sistema.
-     *
-     * @param email correo a verificar
-     * @return true si ya existe
-     */
     static boolean correoYaRegistrado(String email) {
         for (Usuario u : usuarios) {
             if (u.getEmail().equalsIgnoreCase(email)) return true;
@@ -233,8 +257,12 @@ public class Main {
             if (u.iniciarSesion(email, password)) {
                 usuarioActual = u;
                 System.out.println("Bienvenido, " + u.getNombre() + "!");
+
+                // Se verifica si la membresía sigue activa al iniciar sesión
                 if (u instanceof UsuarioPremium premium) {
-                    System.out.println("Tipo: PREMIUM | Pago: " + premium.getMetodoPago());
+                    boolean activa = premium.verificarMembresia();
+                    System.out.println("Tipo: PREMIUM | Membresia: " + (activa ? "ACTIVA" : "VENCIDA"));
+                    System.out.println("Vence: " + premium.getFechaExpiracion());
                 } else {
                     System.out.println("Tipo: CLASICO");
                 }
@@ -269,10 +297,11 @@ public class Main {
         System.out.print("Descripcion: ");
         String descripcion = scanner.nextLine();
         Prioridad prioridad = leerPrioridad();
-        LocalDate fecha = leerFecha("Fecha del recordatorio");
+
+        LocalDate fechaLimite = leerFecha("Fecha limite del recordatorio");
         int id = usuarioActual.getElementos().size() + 1;
 
-        Recordatorio recordatorio = new Recordatorio(id, titulo, descripcion, prioridad, fecha);
+        Recordatorio recordatorio = new Recordatorio(id, titulo, descripcion, prioridad, fechaLimite);
         usuarioActual.crearElemento(recordatorio);
     }
 
@@ -308,9 +337,13 @@ public class Main {
                 && idxUsuario >= 0 && idxUsuario < otros.size()) {
             Elemento elementoACompartir = elementos.get(idxElemento);
             Usuario usuarioDestino = otros.get(idxUsuario);
+
+            // compartirElemento(): void
             usuarioActual.compartirElemento(elementoACompartir, usuarioDestino);
             elementoACompartir.getUsuariosCompartidos().add(usuarioActual);
-            usuarioDestino.agregarElemento(elementoACompartir);
+
+            // elementos: List<Elemento> en Usuario guarda los elementos compartidos
+            usuarioDestino.crearElemento(elementoACompartir);
             System.out.println("Elemento agregado a la lista de " + usuarioDestino.getNombre());
         } else {
             System.out.println("Seleccion invalida.");
@@ -336,6 +369,8 @@ public class Main {
 
         System.out.println("1. PENDIENTE  2. EN_PROGRESO  3. COMPLETADA  4. CANCELADA");
         System.out.print("Opcion: ");
+
+        // Estado es un <<Enum>> con PENDIENTE, EN_PROGRESO, COMPLETADA, CANCELADA
         Estado nuevoEstado = switch (leerInt()) {
             case 1 -> Estado.PENDIENTE;
             case 2 -> Estado.EN_PROGRESO;
@@ -345,12 +380,14 @@ public class Main {
         };
 
         if (nuevoEstado != null && idx >= 0 && idx < tareas.size()) {
+            // cambiarEstado(nuevoEstado: Estado): void
             tareas.get(idx).cambiarEstado(nuevoEstado);
         } else {
             System.out.println("Opcion invalida.");
         }
     }
 
+    //Thread
     static void simularConcurrencia() {
         System.out.println("\n-- Simulacion de acceso concurrente --");
         System.out.print("Titulo de tarea 1: ");
@@ -358,8 +395,8 @@ public class Main {
         System.out.print("Titulo de tarea 2: ");
         String t2 = scanner.nextLine();
 
-        Tarea tarea1 = new Tarea(901, t1, "Hilo-1", Prioridad.ALTA, Estado.PENDIENTE, LocalDate.now());
-        Tarea tarea2 = new Tarea(902, t2, "Hilo-2", Prioridad.MEDIA, Estado.PENDIENTE, LocalDate.now());
+        Tarea tarea1 = new Tarea(901, t1, "Hilo-1", Prioridad.ALTA, Estado.PENDIENTE, LocalDate.now().plusDays(1));
+        Tarea tarea2 = new Tarea(902, t2, "Hilo-2", Prioridad.MEDIA, Estado.PENDIENTE, LocalDate.now().plusDays(1));
 
         GestorTareasThread hilo1 = new GestorTareasThread(usuarioActual, tarea1);
         GestorTareasThread hilo2 = new GestorTareasThread(usuarioActual, tarea2);
@@ -397,6 +434,7 @@ public class Main {
     }
 
     static Prioridad leerPrioridad() {
+        // Prioridad es un <<Enum>> con ALTA, MEDIA, BAJA
         System.out.println("Prioridad: 1. ALTA  2. MEDIA  3. BAJA");
         System.out.print("Opcion: ");
         return switch (leerInt()) {
