@@ -8,9 +8,8 @@ import sistemagestiontareas.model.UsuarioClasico;
 import sistemagestiontareas.model.UsuarioPremium;
 import sistemagestiontareas.model.ValidadorCorreo;
 import sistemagestiontareas.thread.AutoGuardarThread;
-import sistemagestiontareas.thread.GestorTareasThread;
 
-//Strategy
+// Strategy
 import sistemagestiontareas.patterns.FormaPago;
 import sistemagestiontareas.patterns.TarjetaCredito;
 import sistemagestiontareas.patterns.TarjetaDebito;
@@ -41,16 +40,14 @@ public class Main {
             switch (opcion) {
                 case 1 -> registrarUsuario();
                 case 2 -> iniciarSesion();
-                case 3 -> {
-                    if (verificarSesion()) menuUsuario();
-                }
+                case 3 -> { if (verificarSesion()) menuUsuario(); }
                 case 0 -> System.out.println("Saliendo del sistema...");
                 default -> System.out.println("Opcion invalida.");
             }
         } while (opcion != 0);
     }
 
-    // Menús
+    // ─── Menús ───────────────────────────────────────────────────────────────
 
     static void mostrarMenuPrincipal() {
         System.out.println("\n--- MENU PRINCIPAL ---");
@@ -70,8 +67,7 @@ public class Main {
             System.out.println("3. Ver mis elementos");
             System.out.println("4. Compartir elemento");
             System.out.println("5. Cambiar estado de tarea");
-            System.out.println("6. Simular acceso concurrente (Threads)");
-            System.out.println("7. Cerrar sesion");
+            System.out.println("6. Cerrar sesion");
             System.out.println("0. Salir");
             System.out.print("Opcion: ");
             opcion = leerInt();
@@ -81,8 +77,7 @@ public class Main {
                 case 3 -> usuarioActual.mostrarElementos();
                 case 4 -> compartirElemento();
                 case 5 -> cambiarEstadoTarea();
-                case 6 -> simularConcurrencia();
-                case 7 -> {
+                case 6 -> {
                     usuarioActual.cerrarSesion();
                     usuarioActual = null;
                     opcion = 0;
@@ -93,10 +88,11 @@ public class Main {
         } while (opcion != 0);
     }
 
-    // Funcionalidades
+    // ─── Funcionalidades ─────────────────────────────────────────────────────
 
     static void registrarUsuario() {
         System.out.println("\n-- Registro de usuario --");
+
         System.out.print("Nombre: ");
         String nombre = scanner.nextLine();
         while (nombre.trim().isEmpty()) {
@@ -136,18 +132,11 @@ public class Main {
 
         try {
             if (tipo == 1) {
-                // DIAGRAMA: Clase "UsuarioClasico"
-                // No necesita forma de pago, solo tiene limiteElementos
                 Usuario nuevo = new UsuarioClasico(nombre, id, email, password);
                 usuarios.add(nuevo);
                 System.out.println("Usuario clasico registrado correctamente.");
 
             } else {
-                // DIAGRAMA: Clase "UsuarioPremium"
-                // Tiene fechaExpiracion y verificarMembresia() como atributos únicos
-
-                // DIAGRAMA: Patrón Strategy — "FormaPago"
-                // El usuario elige entre TarjetaCredito, TarjetaDebito o Paypal
                 System.out.println("Metodo de pago:");
                 System.out.println("1. Tarjeta de credito");
                 System.out.println("2. Tarjeta de debito");
@@ -155,11 +144,9 @@ public class Main {
                 System.out.print("Opcion: ");
                 int opcionPago = leerInt();
 
-                // DIAGRAMA: FormaPago es la interfaz, aquí se decide qué clase concreta usar
                 FormaPago metodoPago = null;
 
                 if (opcionPago == 3) {
-                    // DIAGRAMA: Clase "Paypal" — implementa FormaPago con email y contrasena
                     System.out.print("Correo de PayPal: ");
                     String correoPaypal = scanner.nextLine();
                     while (!validador.validarFormato(correoPaypal) || !validador.validarDominio(correoPaypal)) {
@@ -172,7 +159,6 @@ public class Main {
                     metodoPago = new Paypal(correoPaypal, contrasenaPaypal);
 
                 } else {
-                    // DIAGRAMA: Clases "TarjetaCredito" y "TarjetaDebito" — implementan FormaPago
                     String numeroTarjeta = "";
                     while (true) {
                         System.out.print("Numero de tarjeta (16 digitos): ");
@@ -213,24 +199,17 @@ public class Main {
                     }
 
                     if (opcionPago == 1) {
-                        // TarjetaCredito implementa FormaPago
                         metodoPago = new TarjetaCredito(numeroTarjeta, fechaVencimientoTarjeta, titular, cvv);
                         System.out.println("Tarjeta de credito registrada.");
                     } else {
-                        // TarjetaDebito implementa FormaPago
                         metodoPago = new TarjetaDebito(numeroTarjeta, fechaVencimientoTarjeta, titular, cvv);
                         System.out.println("Tarjeta de debito registrada.");
                     }
                 }
 
-                // UsuarioPremium tiene fechaExpiracion: LocalDate
-                // Se asigna un mes desde hoy como membresía mensual
                 LocalDate fechaExpiracion = LocalDate.now().plusMonths(1);
-
                 Usuario nuevo = new UsuarioPremium(nombre, id, email, password, fechaExpiracion);
-
                 nuevo.setMetodoPago(metodoPago);
-
                 usuarios.add(nuevo);
                 System.out.println("Usuario premium registrado correctamente.");
                 System.out.println("Membresia valida hasta: " + fechaExpiracion);
@@ -259,7 +238,6 @@ public class Main {
                 usuarioActual = u;
                 System.out.println("Bienvenido, " + u.getNombre() + "!");
 
-                // Se verifica si la membresía sigue activa al iniciar sesión
                 if (u instanceof UsuarioPremium premium) {
                     boolean activa = premium.verificarMembresia();
                     System.out.println("Tipo: PREMIUM | Membresia: " + (activa ? "ACTIVA" : "VENCIDA"));
@@ -276,6 +254,7 @@ public class Main {
     static void crearTarea() {
         System.out.println("\n-- Crear tarea --");
 
+        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
         AutoGuardarThread autoGuardar = new AutoGuardarThread("Tarea");
         autoGuardar.start();
 
@@ -289,16 +268,21 @@ public class Main {
         String descripcion = scanner.nextLine();
         Prioridad prioridad = leerPrioridad();
         LocalDate fechaLimite = leerFecha("Fecha limite");
-        autoGuardar.detener();
-        int id = usuarioActual.getElementos().size() + 1;
 
+        // JOIN: se detiene el hilo antes de guardar el elemento
+        autoGuardar.detener();
+
+        int id = usuarioActual.getElementos().size() + 1;
         Tarea tarea = new Tarea(id, titulo, descripcion, prioridad, Estado.PENDIENTE, fechaLimite);
         usuarioActual.crearElemento(tarea);
+
+        System.out.println("Tarea guardada exitosamente.");
     }
 
     static void crearRecordatorio() {
         System.out.println("\n-- Crear recordatorio --");
 
+        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
         AutoGuardarThread autoGuardar = new AutoGuardarThread("Recordatorio");
         autoGuardar.start();
 
@@ -307,13 +291,16 @@ public class Main {
         System.out.print("Descripcion: ");
         String descripcion = scanner.nextLine();
         Prioridad prioridad = leerPrioridad();
-
         LocalDate fechaLimite = leerFecha("Fecha limite del recordatorio");
-        autoGuardar.detener();
-        int id = usuarioActual.getElementos().size() + 1;
 
+        // JOIN: se detiene el hilo antes de guardar el elemento
+        autoGuardar.detener();
+
+        int id = usuarioActual.getElementos().size() + 1;
         Recordatorio recordatorio = new Recordatorio(id, titulo, descripcion, prioridad, fechaLimite);
         usuarioActual.crearElemento(recordatorio);
+
+        System.out.println("Recordatorio guardado exitosamente.");
     }
 
     static void compartirElemento() {
@@ -348,12 +335,8 @@ public class Main {
                 && idxUsuario >= 0 && idxUsuario < otros.size()) {
             Elemento elementoACompartir = elementos.get(idxElemento);
             Usuario usuarioDestino = otros.get(idxUsuario);
-
-            // compartirElemento(): void
             usuarioActual.compartirElemento(elementoACompartir, usuarioDestino);
             elementoACompartir.getUsuariosCompartidos().add(usuarioActual);
-
-            // elementos: List<Elemento> en Usuario guarda los elementos compartidos
             usuarioDestino.crearElemento(elementoACompartir);
             System.out.println("Elemento agregado a la lista de " + usuarioDestino.getNombre());
         } else {
@@ -381,7 +364,6 @@ public class Main {
         System.out.println("1. PENDIENTE  2. EN_PROGRESO  3. COMPLETADA  4. CANCELADA");
         System.out.print("Opcion: ");
 
-        // Estado es un <<Enum>> con PENDIENTE, EN_PROGRESO, COMPLETADA, CANCELADA
         Estado nuevoEstado = switch (leerInt()) {
             case 1 -> Estado.PENDIENTE;
             case 2 -> Estado.EN_PROGRESO;
@@ -391,42 +373,13 @@ public class Main {
         };
 
         if (nuevoEstado != null && idx >= 0 && idx < tareas.size()) {
-            // cambiarEstado(nuevoEstado: Estado): void
             tareas.get(idx).cambiarEstado(nuevoEstado);
         } else {
             System.out.println("Opcion invalida.");
         }
     }
 
-    //Thread
-    static void simularConcurrencia() {
-        System.out.println("\n-- Simulacion de acceso concurrente --");
-        System.out.print("Titulo de tarea 1: ");
-        String t1 = scanner.nextLine();
-        System.out.print("Titulo de tarea 2: ");
-        String t2 = scanner.nextLine();
-
-        Tarea tarea1 = new Tarea(901, t1, "Hilo-1", Prioridad.ALTA, Estado.PENDIENTE, LocalDate.now().plusDays(1));
-        Tarea tarea2 = new Tarea(902, t2, "Hilo-2", Prioridad.MEDIA, Estado.PENDIENTE, LocalDate.now().plusDays(1));
-
-        GestorTareasThread hilo1 = new GestorTareasThread(usuarioActual, tarea1);
-        GestorTareasThread hilo2 = new GestorTareasThread(usuarioActual, tarea2);
-
-        hilo1.setName("Hilo-1");
-        hilo2.setName("Hilo-2");
-
-        hilo1.start();
-        hilo2.start();
-
-        try {
-            hilo1.join();
-            hilo2.join();
-        } catch (InterruptedException e) {
-            System.out.println("Error en los hilos: " + e.getMessage());
-        }
-    }
-
-    // Helpers
+    // --- Helpers --------
 
     static boolean verificarSesion() {
         if (usuarioActual == null) {
@@ -445,7 +398,6 @@ public class Main {
     }
 
     static Prioridad leerPrioridad() {
-        // Prioridad es un <<Enum>> con ALTA, MEDIA, BAJA
         System.out.println("Prioridad: 1. ALTA  2. MEDIA  3. BAJA");
         System.out.print("Opcion: ");
         return switch (leerInt()) {
