@@ -7,6 +7,7 @@ import sistemagestiontareas.model.Usuario;
 import sistemagestiontareas.model.UsuarioClasico;
 import sistemagestiontareas.model.UsuarioPremium;
 import sistemagestiontareas.model.ValidadorCorreo;
+import sistemagestiontareas.thread.AutoGuardarThread;
 import sistemagestiontareas.thread.GestorTareasThread;
 
 //Strategy
@@ -274,6 +275,10 @@ public class Main {
 
     static void crearTarea() {
         System.out.println("\n-- Crear tarea --");
+
+        AutoGuardarThread autoGuardar = new AutoGuardarThread("Tarea");
+        autoGuardar.start();
+
         System.out.print("Titulo: ");
         String titulo = scanner.nextLine();
         while (titulo.trim().isEmpty()) {
@@ -284,6 +289,7 @@ public class Main {
         String descripcion = scanner.nextLine();
         Prioridad prioridad = leerPrioridad();
         LocalDate fechaLimite = leerFecha("Fecha limite");
+        autoGuardar.detener();
         int id = usuarioActual.getElementos().size() + 1;
 
         Tarea tarea = new Tarea(id, titulo, descripcion, prioridad, Estado.PENDIENTE, fechaLimite);
@@ -292,6 +298,10 @@ public class Main {
 
     static void crearRecordatorio() {
         System.out.println("\n-- Crear recordatorio --");
+
+        AutoGuardarThread autoGuardar = new AutoGuardarThread("Recordatorio");
+        autoGuardar.start();
+
         System.out.print("Titulo: ");
         String titulo = scanner.nextLine();
         System.out.print("Descripcion: ");
@@ -299,6 +309,7 @@ public class Main {
         Prioridad prioridad = leerPrioridad();
 
         LocalDate fechaLimite = leerFecha("Fecha limite del recordatorio");
+        autoGuardar.detener();
         int id = usuarioActual.getElementos().size() + 1;
 
         Recordatorio recordatorio = new Recordatorio(id, titulo, descripcion, prioridad, fechaLimite);
