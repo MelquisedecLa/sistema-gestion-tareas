@@ -2,6 +2,7 @@ package sistemagestiontareas.model;
 
 import sistemagestiontareas.enums.Estado;
 import sistemagestiontareas.enums.Prioridad;
+import java.time.LocalDate;
 
 /**
  * Clase que representa una tarea dentro del sistema.
@@ -13,34 +14,29 @@ public class Tarea extends Elemento {
     /**
      * Constructor de la clase Tarea.
      *
-     * @param id identificador de la tarea
-     * @param titulo título de la tarea
+     * @param id          identificador de la tarea
+     * @param titulo      título de la tarea
      * @param descripcion descripción de la tarea
-     * @param prioridad prioridad de la tarea
-     * @param estado estado actual de la tarea
+     * @param prioridad   prioridad de la tarea
+     * @param estado      estado actual de la tarea
+     * @param fechaLimite fecha límite de entrega
      */
-    public Tarea(
-            int id,
-            String titulo,
-            String descripcion,
-            Prioridad prioridad,
-            Estado estado) {
-        super(id, titulo, descripcion, prioridad);
+    public Tarea(int id, String titulo, String descripcion,
+                 Prioridad prioridad, Estado estado, LocalDate fechaLimite) {
+        super(id, titulo, descripcion, prioridad, fechaLimite);
         this.estado = estado;
     }
 
     /** @return estado actual de la tarea */
-    public Estado getEstado() {
-        return estado;
-    }
+    public Estado getEstado() { return estado; }
 
-    /** @param estado nuevo estado de la tarea */
-    public void setEstado(Estado estado) {
-        this.estado = estado;
-    }
+    /** @param estado nuevo estado */
+    public void setEstado(Estado estado) { this.estado = estado; }
+
+
 
     /**
-     * Permite cambiar el estado de la tarea.
+     * Cambia el estado de la tarea.
      *
      * @param nuevoEstado nuevo estado asignado
      */
@@ -49,12 +45,10 @@ public class Tarea extends Elemento {
         System.out.println("El estado de la tarea cambió a: " + nuevoEstado);
     }
 
-    /**
-     * Muestra la información de la tarea.
-     */
     @Override
     public void mostrarInfo() {
         super.mostrarInfo();
         System.out.println("Estado: " + estado);
+        System.out.println("Fecha límite: " + getFechaLimite());
     }
 }

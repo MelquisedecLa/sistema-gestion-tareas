@@ -1,35 +1,28 @@
 package sistemagestiontareas.model;
 
-/**
- * Representa a un usuario clásico dentro del sistema.
- * Este tipo de usuario tiene ciertas restricciones funcionales
- * en comparación con un usuario premium.
- */
 public class UsuarioClasico extends Usuario {
 
-    /**
-     * Constructor de la clase UsuarioClasico.
-     *
-     * @param nombre nombre del usuario
-     * @param id identificador del usuario
-     * @param email correo electrónico del usuario
-     * @param password contraseña del usuario
-     */
+    // el usuario tiene un límite máximo de elementos que puede crear.
+    private int limiteElementos;
+
     public UsuarioClasico(String nombre, int id, String email, String password) {
         super(nombre, id, email, password);
+        this.limiteElementos = 3; // límite por defecto
     }
 
-    /**
-     * Verifica el límite de tareas permitido para un usuario clásico.
-     */
-    public void verificarLimiteTareas() {
-        System.out.println("Verificando límite de tareas del usuario clásico...");
+    // verifica si el usuario todavía puede crear más elementos sin pasarse del límite.
+    public boolean verificarLimiteTareas() {
+        return getElementos().size() < limiteElementos;
+    }
+    // pero en UsuarioClasico verificamos el límite antes de crear.
+    @Override
+    public void crearElemento(Elemento elemento) {
+        if (verificarLimiteTareas()) {
+            super.crearElemento(elemento);
+        } else {
+            System.out.println("Límite de " + limiteElementos + " elementos alcanzado. No se puede crear más.");
+        }
     }
 
-    /**
-     * Simula la creación de un elemento con restricciones propias del usuario clásico.
-     */
-    public void crearElemento() {
-        System.out.println("Usuario clásico crea un elemento con restricciones.");
-    }
+    public int getLimiteElementos() { return limiteElementos; }
 }

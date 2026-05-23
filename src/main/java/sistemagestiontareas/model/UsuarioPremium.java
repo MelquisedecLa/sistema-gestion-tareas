@@ -1,34 +1,24 @@
 package sistemagestiontareas.model;
 
-/**
- * Representa a un usuario premium dentro del sistema.
- * Este tipo de usuario tiene acceso completo a las funcionalidades.
- */
+import java.time.LocalDate;
+
 public class UsuarioPremium extends Usuario {
 
-    /**
-     * Constructor de la clase UsuarioPremium.
-     *
-     * @param nombre nombre del usuario
-     * @param id identificador del usuario
-     * @param email correo electrónico del usuario
-     * @param password contraseña del usuario
-     */
-    public UsuarioPremium(String nombre, int id, String email, String password) {
+    //representa cuándo vence la membresía mensual del usuario premium.
+    private LocalDate fechaExpiracion;
+
+    public UsuarioPremium(String nombre, int id, String email, String password, LocalDate fechaExpiracion) {
         super(nombre, id, email, password);
+        // La fecha de expiración es un mes desde que se registra
+        this.fechaExpiracion = fechaExpiracion;
     }
 
-    /**
-     * Indica que el usuario tiene acceso completo.
-     */
-    public void accesoCompleto() {
-        System.out.println("Acceso completo habilitado.");
+    // Método ÚNICO de UsuarioPremium — verifica si la membresía
+    // del usuario premium sigue vigente comparando con la fecha actual.
+    public boolean verificarMembresia() {
+        return LocalDate.now().isBefore(fechaExpiracion);
     }
 
-    /**
-     * Simula la creación de un elemento sin restricciones.
-     */
-    public void crearElemento() {
-        System.out.println("Usuario premium crea elemento sin restricciones.");
-    }
+    public LocalDate getFechaExpiracion() { return fechaExpiracion; }
+    public void setFechaExpiracion(LocalDate fechaExpiracion) { this.fechaExpiracion = fechaExpiracion; }
 }

@@ -5,6 +5,7 @@ import sistemagestiontareas.interfaces.Compartible;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
 /**
  * Clase abstracta que representa un elemento del sistema.
@@ -16,6 +17,7 @@ public abstract class Elemento implements Compartible {
     private String titulo;
     private String descripcion;
     private Prioridad prioridad;
+    private LocalDate fechaLimite;
     private List<Usuario> usuariosCompartidos;
 
     /**
@@ -26,11 +28,12 @@ public abstract class Elemento implements Compartible {
      * @param descripcion descripción del elemento
      * @param prioridad nivel de prioridad del elemento
      */
-    public Elemento(int id, String titulo, String descripcion, Prioridad prioridad) {
+    public Elemento(int id, String titulo, String descripcion, Prioridad prioridad, LocalDate fechaLimite) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.prioridad = prioridad;
+        this.fechaLimite = fechaLimite;
         this.usuariosCompartidos = new ArrayList<>();
     }
 
@@ -69,6 +72,9 @@ public abstract class Elemento implements Compartible {
         return prioridad;
     }
 
+    public LocalDate getFechaLimite() { return fechaLimite; }
+    public void setFechaLimite(LocalDate fechaLimite) { this.fechaLimite = fechaLimite; }
+
     /** @param prioridad nueva prioridad del elemento */
     public void setPrioridad(Prioridad prioridad) {
         this.prioridad = prioridad;
@@ -87,7 +93,6 @@ public abstract class Elemento implements Compartible {
     @Override
     public void compartir(Usuario usuario) {
         if (usuario != null) {
-            usuariosCompartidos.add(usuario);
             System.out.println("Elemento compartido con: " + usuario.getNombre());
         }
     }
@@ -100,7 +105,13 @@ public abstract class Elemento implements Compartible {
         System.out.println("Título: " + titulo);
         System.out.println("Descripción: " + descripcion);
         System.out.println("Prioridad: " + prioridad);
-        System.out.println(
-                "Cantidad de usuarios compartidos: " + usuariosCompartidos.size());
+        if (usuariosCompartidos.isEmpty()) {
+            System.out.println("No compartido con nadie.");
+        } else {
+            System.out.println("Compartido por/con:");
+            for (Usuario u : usuariosCompartidos) {
+                System.out.println("  - " + u.getNombre() + " (" + u.getEmail() + ")");
+            }
+        }
     }
 }

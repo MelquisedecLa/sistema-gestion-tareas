@@ -1,70 +1,93 @@
 package sistemagestiontareas.model;
 
-/**
- * Clase que representa un usuario del sistema.
- */
-public class Usuario {
+import java.util.ArrayList;
+import java.util.List;
+import sistemagestiontareas.interfaces.Autenticable;
+import sistemagestiontareas.patterns.FormaPago;
+
+public abstract class Usuario implements Autenticable {
 
     private int id;
     private String nombre;
     private String email;
     private String password;
 
-    /** Constructor vacío */
-    public Usuario() {}
+
+    private ValidadorCorreo validador;
+
+    // Esta lista es la que "guarda" los elementos que el usuario crea.
+    private List<Elemento> elementos;
+
+    // Usuario no sabe si es PayPal, Débito o Crédito, solo llama procesarPago().
+    private FormaPago metodoPago;
+
+    public Usuario() {
+        this.elementos = new ArrayList<>();
+        this.validador = new ValidadorCorreo();
+    }
 
     /**
-     * Constructor con parámetros.
-     *
-     * @param nombre nombre del usuario
-     * @param id identificador del usuario
-     * @param email correo electrónico del usuario
+     * @param nombre   nombre del usuario
+     * @param id       identificador del usuario
+     * @param email    correo electrónico del usuario
      * @param password contraseña del usuario
      */
     public Usuario(String nombre, int id, String email, String password) {
+        this.validador = new ValidadorCorreo();
+        if (!validador.validarFormato(email) || !validador.validarDominio(email)) {
+            throw new IllegalArgumentException("El correo no es válido: " + email);
+        }
         this.nombre = nombre;
         this.id = id;
         this.email = email;
         this.password = password;
+        this.elementos = new ArrayList<>();
     }
 
-    /** @return correo electrónico del usuario */
-    public String getEmail() {
-        return email;
+    // Viene de implementar la interfaz Autenticable
+    @Override
+    public boolean iniciarSesion(String email, String clave) {
+        return this.email.equals(email) && this.password.equals(clave);
     }
 
-    /** @param email nuevo correo electrónico */
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public void cerrarSesion() {
+        System.out.println("Sesión cerrada para: " + nombre);
     }
 
-    /** @return id del usuario */
-    public int getId() {
-        return id;
+    // Método público de Usuario. Agrega el elemento a la lista
+    public void crearElemento(Elemento elemento) {
+        if (elemento != null) {
+            elementos.add(elemento);
+            System.out.println("Elemento creado y guardado: " + elemento.getTitulo());
+        }
     }
 
-    /** @param id nuevo id del usuario */
-    public void setId(int id) {
-        this.id = id;
+    public void compartirElemento(Elemento elemento, Usuario usuario) {
+        elemento.compartir(usuario);
     }
 
-    /** @return nombre del usuario */
-    public String getNombre() {
-        return nombre;
+    /**
+     * Muestra todos los elementos del usuario.
+     * Método auxiliar, no está en diagrama pero necesario para el código.
+     */
+    public void mostrarElementos() {
+        System.out.println("Elementos de " + nombre + ":");
+        for (Elemento e : elementos) {
+            e.mostrarInfo();
+            System.out.println("-------------------");
+        }
     }
 
-    /** @param nombre nuevo nombre del usuario */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setMetodoPago(FormaPago metodoPago) {
+        this.metodoPago = metodoPago;
     }
 
-    /** @return contraseña del usuario */
-    public String getPassword() {
-        return password;
-    }
+    public FormaPago getMetodoPago() { return metodoPago; }
 
-    /** @param password nueva contraseña */
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public List<Elemento> getElementos() { return elementos; }
+    public int getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getEmail() { return email; }
+    public String getPassword() { return password; }
 }
