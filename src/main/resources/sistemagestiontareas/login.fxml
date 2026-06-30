@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="15.0" prefWidth="400.0" prefHeight="400.0"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="sistemagestiontareas.controller.LoginController">
+    <padding>
+        <Insets top="40" bottom="40" left="40" right="40"/>
+    </padding>
+
+    <Label text="Sistema de Gestión de Tareas" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <TextField fx:id="campoEmail" promptText="Correo electrónico"/>
+    <PasswordField fx:id="campoPassword" promptText="Contraseña"/>
+
+    <Label fx:id="labelError" style="-fx-text-fill: red;"/>
+
+    <Button text="Iniciar Sesión" onAction="#onIniciarSesion" defaultButton="true"/>
+    <Button text="¿No tienes cuenta? Regístrate" onAction="#onIrARegistro" styleClass="button-enlace"/>
+</VBox>
