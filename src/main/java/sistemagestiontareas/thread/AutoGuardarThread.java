@@ -20,6 +20,7 @@ public class AutoGuardarThread extends Thread {
 
                     System.out.print("\r");
                     System.out.print(" [Auto-Guardado] " + tipoElemento + " guardado automáticamente...");
+                    // aqui falta autoguardar
                     System.out.print("\n\r");
                     System.out.print("Puedes continuar editando el campo anterior: ");
                 }
