@@ -28,32 +28,20 @@ public class LoginController {
             return;
         }
 
-        Usuario usuario;
         try {
-            usuario = usuarioDAO.buscarPorEmail(email);
-        } catch (Exception e) {
+            Usuario usuario = usuarioDAO.buscarPorEmail(email);
+
+            if (usuario == null || !usuario.iniciarSesion(email, password)) {
+                labelError.setText("Credenciales incorrectas.");
+                return;
+            }
+
+            Sesion.setUsuarioActual(usuario);
+            App.cambiarEscena("main.fxml", "Sistema de Gestión de Tareas");
+
+        } catch (RuntimeException e) {
             labelError.setText("Error al conectar con la base de datos.");
             e.printStackTrace();
-            return;
-        }
-
-        // No existe ningún usuario registrado con ese correo.
-        if (usuario == null) {
-            labelError.setText("No existe una cuenta con ese correo.");
-            return;
-        }
-
-        // Existe el correo, pero la contraseña no coincide.
-        if (!usuario.iniciarSesion(email, password)) {
-            labelError.setText("Contraseña incorrecta.");
-            return;
-        }
-
-        // Credenciales correctas: guardamos la sesión y avanzamos.
-        Sesion.setUsuarioActual(usuario);
-
-        try {
-            App.cambiarEscena("main.fxml", "Sistema de Gestión de Tareas");
         } catch (Exception e) {
             labelError.setText("Error al cargar la pantalla principal.");
             e.printStackTrace();

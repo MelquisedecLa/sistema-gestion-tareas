@@ -1,31 +1,24 @@
 package sistemagestiontareas.dao;
 
 import sistemagestiontareas.model.Usuario;
+import java.util.List;
 
-/**
- * Define las operaciones de persistencia disponibles para Usuario.
- */
 public interface UsuarioDAO {
 
-    /**
-     * Inserta un nuevo usuario (y su forma de pago si aplica) en la base de datos.
-     *
-     * @param usuario usuario a guardar
-     * @return el id generado por la base de datos
-     */
+    // Guarda el usuario y su forma de pago si es premium, devuelve el id generado
     int guardar(Usuario usuario);
 
-    /**
-     * Busca un usuario por su correo electrónico, reconstruyendo el objeto
-     * correcto (UsuarioClasico o UsuarioPremium) según corresponda.
-     *
-     * @param email correo a buscar
-     * @return el usuario encontrado, o null si no existe
-     */
+    Usuario buscarPorId(int id);
+
+    // Busca por email para el login, reconstruye Clasico o Premium segun el tipo
     Usuario buscarPorEmail(String email);
 
-    /**
-     * Verifica si ya existe un usuario registrado con ese correo.
-     */
+    List<Usuario> buscarTodos();
+
+    boolean actualizar(Usuario usuario);
+
+    boolean eliminar(int id);
+
+    // Para no dejar registrar dos veces el mismo correo
     boolean existeEmail(String email);
 }

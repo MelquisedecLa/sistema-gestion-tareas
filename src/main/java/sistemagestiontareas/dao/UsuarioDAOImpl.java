@@ -11,12 +11,21 @@ import sistemagestiontareas.patterns.TarjetaDebito;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.ArrayList;
 
 public class UsuarioDAOImpl implements UsuarioDAO {
 
+    // Guardamos la conexión aquí para no llamar a ConexionBD.getInstancia() en cada método
+    private ConexionBD conexion;
+
+    public UsuarioDAOImpl() {
+        this.conexion = ConexionBD.getInstancia();
+    }
+
     @Override
     public int guardar(Usuario usuario) {
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = conexion.getConexion();
 
         String sqlUsuario = "INSERT INTO usuarios (nombre, email, password, tipo_usuario, limite_elementos, fecha_expiracion) " +
                 "VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
@@ -57,7 +66,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     }
 
     private void guardarFormaPago(int usuarioId, FormaPago formaPago) {
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = conexion.getConexion();
         String sql = "INSERT INTO formas_pago (usuario_id, tipo, email_paypal, contrasena_paypal, " +
                 "numero_tarjeta, fecha_expiracion_tarjeta, titular, cvv) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -67,7 +76,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             if (formaPago instanceof Paypal paypal) {
                 ps.setString(2, "PAYPAL");
                 ps.setString(3, paypal.getEmail());
-                ps.setString(4, ""); // no se expone el password de Paypal por getter, ver nota abajo
+                ps.setString(4, paypal.getContrasena());
                 ps.setNull(5, Types.VARCHAR);
                 ps.setNull(6, Types.DATE);
                 ps.setNull(7, Types.VARCHAR);
@@ -101,7 +110,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public Usuario buscarPorEmail(String email) {
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = conexion.getConexion();
         String sql = "SELECT * FROM usuarios WHERE email = ?";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -120,7 +129,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public boolean existeEmail(String email) {
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = conexion.getConexion();
         String sql = "SELECT 1 FROM usuarios WHERE email = ?";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -145,6 +154,73 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             return new UsuarioPremium(nombre, id, email, password, fechaExpiracion);
         } else {
             return new UsuarioClasico(nombre, id, email, password);
+        }
+    }
+    @Override
+    public Usuario buscarPorId(int id) {
+        Connection con = conexion.getConexion();
+        String sql = "SELECT * FROM usuarios WHERE id = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapearUsuario(rs);
+            }
+            return null;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al buscar el usuario: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<Usuario> buscarTodos() {
+        Connection con = conexion.getConexion();
+        String sql = "SELECT * FROM usuarios";
+        List<Usuario> usuarios = new ArrayList<>();
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                usuarios.add(mapearUsuario(rs));
+            }
+            return usuarios;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al listar los usuarios: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean actualizar(Usuario usuario) {
+        Connection con = conexion.getConexion();
+        String sql = "UPDATE usuarios SET nombre = ?, email = ?, password = ? WHERE id = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, usuario.getNombre());
+            ps.setString(2, usuario.getEmail());
+            ps.setString(3, usuario.getPassword());
+            ps.setInt(4, usuario.getId());
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al actualizar el usuario: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean eliminar(int id) {
+        Connection con = conexion.getConexion();
+        String sql = "DELETE FROM usuarios WHERE id = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al eliminar el usuario: " + e.getMessage(), e);
         }
     }
 }

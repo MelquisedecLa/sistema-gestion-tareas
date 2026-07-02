@@ -49,4 +49,24 @@ public class ConexionBD {
         }
         return conexion;
     }
+    public void conectar() {
+        try {
+            if (conexion == null || conexion.isClosed()) {
+                conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("No se pudo conectar a la base de datos: " + e.getMessage(), e);
+        }
+    }
+
+    public void desconectar() {
+        try {
+            if (conexion != null && !conexion.isClosed()) {
+                conexion.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("No se pudo cerrar la conexión: " + e.getMessage(), e);
+        }
+    }
+
 }

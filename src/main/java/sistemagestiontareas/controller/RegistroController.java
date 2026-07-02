@@ -2,6 +2,7 @@ package sistemagestiontareas.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import sistemagestiontareas.App;
 import sistemagestiontareas.dao.UsuarioDAO;
 import sistemagestiontareas.dao.UsuarioDAOImpl;
@@ -13,7 +14,6 @@ import sistemagestiontareas.patterns.FormaPago;
 import sistemagestiontareas.patterns.Paypal;
 import sistemagestiontareas.patterns.TarjetaCredito;
 import sistemagestiontareas.patterns.TarjetaDebito;
-import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
 
@@ -83,19 +83,19 @@ public class RegistroController {
             return;
         }
 
-        // Antes de crear nada, verificamos que el correo no esté ya en uso.
-        if (usuarioDAO.existeEmail(email)) {
-            labelError.setText("Ya existe una cuenta registrada con ese correo.");
-            return;
-        }
+        try {
+            if (usuarioDAO.existeEmail(email)) {
+                labelError.setText("Este correo ya está registrado.");
+                return;
+            }
 
-        Usuario nuevoUsuario;
+            if (radioClasico.isSelected()) {
+                Usuario nuevo = new UsuarioClasico(nombre, 0, email, password);
+                usuarioDAO.guardar(nuevo);
+                volverALogin();
+                return;
+            }
 
-        if (radioClasico.isSelected()) {
-            // El id se ignora: lo asigna la base de datos (SERIAL).
-            nuevoUsuario = new UsuarioClasico(nombre, 0, email, password);
-
-        } else {
             // --- Usuario Premium: requiere método de pago válido ---
             String metodo = comboMetodoPago.getValue();
             if (metodo == null) {
@@ -103,34 +103,26 @@ public class RegistroController {
                 return;
             }
 
-            FormaPago metodoPago;
-            try {
-                metodoPago = switch (metodo) {
-                    case "Tarjeta de Crédito" -> construirTarjeta(true);
-                    case "Tarjeta de Débito" -> construirTarjeta(false);
-                    case "PayPal" -> construirPaypal();
-                    default -> null;
-                };
-            } catch (IllegalArgumentException e) {
-                labelError.setText(e.getMessage());
-                return;
-            }
+            FormaPago metodoPago = switch (metodo) {
+                case "Tarjeta de Crédito" -> construirTarjeta(true);
+                case "Tarjeta de Débito" -> construirTarjeta(false);
+                case "PayPal" -> construirPaypal();
+                default -> null;
+            };
 
             LocalDate fechaExpiracionMembresia = LocalDate.now().plusMonths(1);
-            UsuarioPremium premium = new UsuarioPremium(nombre, 0, email, password, fechaExpiracionMembresia);
-            premium.setMetodoPago(metodoPago);
-            nuevoUsuario = premium;
-        }
+            Usuario nuevo = new UsuarioPremium(nombre, 0, email, password, fechaExpiracionMembresia);
+            nuevo.setMetodoPago(metodoPago);
+            usuarioDAO.guardar(nuevo);
 
-        try {
-            usuarioDAO.guardar(nuevoUsuario);
-        } catch (Exception e) {
-            labelError.setText("Error al guardar el usuario en la base de datos.");
+            volverALogin();
+
+        } catch (IllegalArgumentException e) {
+            labelError.setText(e.getMessage());
+        } catch (RuntimeException e) {
+            labelError.setText("Error al conectar con la base de datos.");
             e.printStackTrace();
-            return;
         }
-
-        volverALogin();
     }
 
     private FormaPago construirTarjeta(boolean esCredito) {

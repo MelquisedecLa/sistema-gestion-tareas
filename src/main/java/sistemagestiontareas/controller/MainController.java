@@ -10,13 +10,28 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sistemagestiontareas.App;
+import sistemagestiontareas.Sesion;
+import sistemagestiontareas.dao.RecordatorioDAO;
+import sistemagestiontareas.dao.RecordatorioDAOImpl;
+import sistemagestiontareas.dao.TareaDAO;
+import sistemagestiontareas.dao.TareaDAOImpl;
+import sistemagestiontareas.dao.ElementoCompartidoDAO;
+import sistemagestiontareas.dao.ElementoCompartidoDAOImpl;
+import sistemagestiontareas.dao.UsuarioDAO;
+import sistemagestiontareas.dao.UsuarioDAOImpl;
 import sistemagestiontareas.enums.Estado;
 import sistemagestiontareas.model.Elemento;
 import sistemagestiontareas.model.Recordatorio;
 import sistemagestiontareas.model.Tarea;
+import sistemagestiontareas.model.Usuario;
+import sistemagestiontareas.model.UsuarioClasico;
+import sistemagestiontareas.model.UsuarioPremium;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainController {
 
@@ -25,23 +40,58 @@ public class MainController {
     @FXML private ListView<Elemento> listViewElementos;
 
     private final ObservableList<Elemento> elementos = FXCollections.observableArrayList();
-    private int siguienteId = 1;
+    private final TareaDAO tareaDAO = new TareaDAOImpl();
+    private final RecordatorioDAO recordatorioDAO = new RecordatorioDAOImpl();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
+    private final ElementoCompartidoDAO compartidoDAO = new ElementoCompartidoDAOImpl();
 
     @FXML
     public void initialize() {
-        // TODO: cuando exista la sesión/DAO real, aquí se carga el usuario y sus elementos reales.
-        labelBienvenida.setText("Bienvenido");
+        Usuario usuario = Sesion.getUsuarioActual();
+        if (usuario == null) return;
+
+        labelBienvenida.setText("Hola, " + usuario.getNombre());
+        labelTipoUsuario.setText(usuario instanceof UsuarioPremium ? "Premium" : "Clásico");
+
+        cargarElementosDesdeBD(usuario.getId());
+
         listViewElementos.setItems(elementos);
         listViewElementos.setCellFactory(lv -> new ElementoListCell(
-                elementos::remove,
+                this::eliminarElemento,
                 this::cambiarEstadoTarea,
                 this::reprogramarRecordatorio,
                 this::editarElemento
         ));
     }
 
+    private void cargarElementosDesdeBD(int usuarioId) {
+        try {
+            elementos.clear();
+            elementos.addAll(tareaDAO.buscarPorUsuario(usuarioId));
+            elementos.addAll(recordatorioDAO.buscarPorUsuario(usuarioId));
+
+            for (int idCompartido : compartidoDAO.buscarIdsCompartidosConUsuario(usuarioId)) {
+                Tarea tarea = tareaDAO.buscarPorId(idCompartido);
+                if (tarea != null) {
+                    elementos.add(tarea);
+                    continue;
+                }
+                Recordatorio recordatorio = recordatorioDAO.buscarPorId(idCompartido);
+                if (recordatorio != null) {
+                    elementos.add(recordatorio);
+                }
+            }
+        } catch (RuntimeException e) {
+            mostrarError("No se pudieron cargar tus tareas y recordatorios.");
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void onCrearTarea() {
+        Usuario usuario = Sesion.getUsuarioActual();
+        if (usuario == null) return;
+
         try {
             FXMLLoader loader = new FXMLLoader(App.class.getResource("crear_tarea.fxml"));
             Parent root = loader.load();
@@ -54,11 +104,24 @@ public class MainController {
             modal.showAndWait();
 
             if (controller.isGuardado()) {
-                Tarea tarea = new Tarea(siguienteId++, controller.getTitulo(),
+                if (usuario instanceof UsuarioClasico clasico
+                        && contarElementosDeUsuario(usuario.getId()) >= clasico.getLimiteElementos()) {
+                    mostrarAdvertencia("Alcanzaste el límite de elementos permitidos para tu cuenta Clásica.");
+                    return;
+                }
+
+                Tarea tarea = new Tarea(0, controller.getTitulo(),
                         controller.getDescripcion(), controller.getPrioridad(),
                         Estado.PENDIENTE, controller.getFecha());
-                elementos.add(tarea);
+
+                int idGenerado = tareaDAO.guardar(tarea, usuario.getId());
+                Tarea tareaGuardada = tareaDAO.buscarPorId(idGenerado);
+                elementos.add(tareaGuardada);
+                usuario.getElementos().add(tareaGuardada);
             }
+        } catch (RuntimeException e) {
+            mostrarError("No se pudo guardar la tarea en la base de datos.");
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,6 +129,9 @@ public class MainController {
 
     @FXML
     private void onCrearRecordatorio() {
+        Usuario usuario = Sesion.getUsuarioActual();
+        if (usuario == null) return;
+
         try {
             FXMLLoader loader = new FXMLLoader(App.class.getResource("crear_recordatorio.fxml"));
             Parent root = loader.load();
@@ -78,10 +144,23 @@ public class MainController {
             modal.showAndWait();
 
             if (controller.isGuardado()) {
-                Recordatorio recordatorio = new Recordatorio(siguienteId++, controller.getTitulo(),
+                if (usuario instanceof UsuarioClasico clasico
+                        && contarElementosDeUsuario(usuario.getId()) >= clasico.getLimiteElementos()) {
+                    mostrarAdvertencia("Alcanzaste el límite de elementos permitidos para tu cuenta Clásica.");
+                    return;
+                }
+
+                Recordatorio recordatorio = new Recordatorio(0, controller.getTitulo(),
                         controller.getDescripcion(), controller.getPrioridad(), controller.getFecha());
-                elementos.add(recordatorio);
+
+                int idGenerado = recordatorioDAO.guardar(recordatorio, usuario.getId());
+                Recordatorio recordatorioGuardado = recordatorioDAO.buscarPorId(idGenerado);
+                elementos.add(recordatorioGuardado);
+                usuario.getElementos().add(recordatorioGuardado);
             }
+        } catch (RuntimeException e) {
+            mostrarError("No se pudo guardar el recordatorio en la base de datos.");
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -107,6 +186,7 @@ public class MainController {
                     tarea.setDescripcion(controller.getDescripcion());
                     tarea.setPrioridad(controller.getPrioridad());
                     tarea.setFechaLimite(controller.getFecha());
+                    tareaDAO.actualizar(tarea);
                     listViewElementos.refresh();
                 }
             } else if (elemento instanceof Recordatorio recordatorio) {
@@ -127,10 +207,31 @@ public class MainController {
                     recordatorio.setDescripcion(controller.getDescripcion());
                     recordatorio.setPrioridad(controller.getPrioridad());
                     recordatorio.setFechaLimite(controller.getFecha());
+                    recordatorioDAO.actualizar(recordatorio);
                     listViewElementos.refresh();
                 }
             }
+        } catch (RuntimeException e) {
+            mostrarError("No se pudo actualizar en la base de datos.");
+            e.printStackTrace();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void eliminarElemento(Elemento elemento) {
+        try {
+            boolean eliminado = (elemento instanceof Tarea)
+                    ? tareaDAO.eliminar(elemento.getId())
+                    : recordatorioDAO.eliminar(elemento.getId());
+
+            if (eliminado) {
+                elementos.remove(elemento);
+                Usuario usuario = Sesion.getUsuarioActual();
+                if (usuario != null) usuario.getElementos().remove(elemento);
+            }
+        } catch (RuntimeException e) {
+            mostrarError("No se pudo eliminar de la base de datos.");
             e.printStackTrace();
         }
     }
@@ -143,8 +244,14 @@ public class MainController {
 
         Optional<Estado> resultado = dialog.showAndWait();
         resultado.ifPresent(nuevoEstado -> {
-            tarea.cambiarEstado(nuevoEstado);
-            listViewElementos.refresh();
+            try {
+                tareaDAO.actualizarEstado(tarea.getId(), nuevoEstado);
+                tarea.cambiarEstado(nuevoEstado);
+                listViewElementos.refresh();
+            } catch (RuntimeException e) {
+                mostrarError("No se pudo actualizar el estado en la base de datos.");
+                e.printStackTrace();
+            }
         });
     }
 
@@ -162,11 +269,11 @@ public class MainController {
         Optional<LocalDate> resultado = dialog.showAndWait();
         resultado.ifPresent(nuevaFecha -> {
             if (nuevaFecha.isBefore(LocalDate.now())) {
-                Alert alerta = new Alert(Alert.AlertType.WARNING, "La fecha no puede ser en el pasado.");
-                alerta.showAndWait();
+                mostrarAdvertencia("La fecha no puede ser en el pasado.");
                 return;
             }
             recordatorio.reprogramarFecha(nuevaFecha);
+            recordatorioDAO.actualizar(recordatorio);
             listViewElementos.refresh();
         });
     }
@@ -175,26 +282,81 @@ public class MainController {
     private void onCompartir() {
         Elemento seleccionado = listViewElementos.getSelectionModel().getSelectedItem();
         if (seleccionado == null) {
-            Alert alerta = new Alert(Alert.AlertType.INFORMATION, "Selecciona primero una tarea o recordatorio de la lista para compartir.");
-            alerta.setHeaderText(null);
-            alerta.showAndWait();
+            mostrarInfo("Selecciona primero una tarea o recordatorio de la lista para compartir.");
             return;
         }
 
-        // TODO: cuando exista el DAO real, aquí se listarán los usuarios reales de la BD para elegir con quién compartir.
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION,
-                "\"" + seleccionado.getTitulo() + "\" está listo para compartirse. " +
-                        "Esta función se activará cuando haya usuarios reales registrados en la base de datos.");
-        alerta.setHeaderText("Compartir elemento");
-        alerta.showAndWait();
+        Usuario actual = Sesion.getUsuarioActual();
+        List<Usuario> candidatos = usuarioDAO.buscarTodos();
+        candidatos.removeIf(u -> u.getId() == actual.getId());
+
+        if (candidatos.isEmpty()) {
+            mostrarInfo("No hay otros usuarios registrados todavía para compartir.");
+            return;
+        }
+
+        Map<String, Usuario> opciones = new LinkedHashMap<>();
+        for (Usuario u : candidatos) {
+            opciones.put(u.getNombre() + " (" + u.getEmail() + ")", u);
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(opciones.keySet().iterator().next(), opciones.keySet());
+        dialog.setTitle("Compartir elemento");
+        dialog.setHeaderText("Compartir \"" + seleccionado.getTitulo() + "\" con:");
+        dialog.setContentText("Usuario:");
+
+        Optional<String> resultado = dialog.showAndWait();
+        resultado.ifPresent(seleccionUsuario -> {
+            Usuario destino = opciones.get(seleccionUsuario);
+
+            if (destino instanceof UsuarioClasico clasico) {
+                if (contarElementosDeUsuario(destino.getId()) >= clasico.getLimiteElementos()) {
+                    mostrarAdvertencia(destino.getNombre() + " ya tiene " + clasico.getLimiteElementos() +
+                            " elementos (su límite como usuario Clásico). Debe eliminar alguno antes de recibir más.");
+                    return;
+                }
+            }
+
+            try {
+                compartidoDAO.compartir(seleccionado.getId(), destino.getId());
+                mostrarInfo("Compartido con " + destino.getNombre() + " correctamente.");
+            } catch (RuntimeException e) {
+                mostrarError("No se pudo compartir el elemento.");
+                e.printStackTrace();
+            }
+        });
     }
 
     @FXML
     private void onCerrarSesion() {
+        Sesion.cerrarSesion();
         try {
             App.cambiarEscena("login.fxml", "Iniciar Sesión");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void mostrarError(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR, mensaje);
+        alerta.setHeaderText(null);
+        alerta.showAndWait();
+    }
+
+    private void mostrarAdvertencia(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING, mensaje);
+        alerta.setHeaderText(null);
+        alerta.showAndWait();
+    }
+
+    private void mostrarInfo(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION, mensaje);
+        alerta.setHeaderText(null);
+        alerta.showAndWait();
+    }
+    private int contarElementosDeUsuario(int usuarioId) {
+        return tareaDAO.buscarPorUsuario(usuarioId).size()
+                + recordatorioDAO.buscarPorUsuario(usuarioId).size()
+                + compartidoDAO.buscarIdsCompartidosConUsuario(usuarioId).size();
     }
 }

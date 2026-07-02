@@ -1,6 +1,7 @@
 package sistemagestiontareas.patterns;
 
 public class Paypal implements FormaPago {
+public String getContrasena() { return contrasena; }
 
     // Atributos privados de Paypal
     private String email;
