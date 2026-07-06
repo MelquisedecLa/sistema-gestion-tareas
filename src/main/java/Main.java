@@ -366,9 +366,27 @@ public class Main {
                 && idxUsuario >= 0 && idxUsuario < otros.size()) {
             Elemento elementoACompartir = elementos.get(idxElemento);
             Usuario usuarioDestino = otros.get(idxUsuario);
+
             usuarioActual.compartirElemento(elementoACompartir, usuarioDestino);
             elementoACompartir.getUsuariosCompartidos().add(usuarioActual);
             usuarioDestino.crearElemento(elementoACompartir);
+
+            if (elementoACompartir instanceof Tarea) {
+                Tarea tareaCompartida = (Tarea) elementoACompartir;
+
+                // Agregar al destino como colaborador
+                tareaCompartida.agregarColaborador(usuarioDestino);
+
+                // Asegurar que el creador también sea colaborador
+                if (!tareaCompartida.esColaborador(usuarioActual)) {
+                    tareaCompartida.agregarColaborador(usuarioActual);
+                }
+
+                System.out.println("✅ " + usuarioDestino.getNombre() +
+                        " ahora es colaborador de la tarea: " + tareaCompartida.getTitulo());
+            }
+            // ===================================
+
             System.out.println("Elemento agregado a la lista de " + usuarioDestino.getNombre());
         } else {
             System.out.println("Seleccion invalida.");
