@@ -254,53 +254,84 @@ public class Main {
     static void crearTarea() {
         System.out.println("\n-- Crear tarea --");
 
-        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
-        AutoGuardarThread autoGuardar = new AutoGuardarThread("Tarea");
-        autoGuardar.start();
-
         System.out.print("Titulo: ");
         String titulo = scanner.nextLine();
         while (titulo.trim().isEmpty()) {
             System.out.print("El titulo no puede estar vacio: ");
             titulo = scanner.nextLine();
         }
+
         System.out.print("Descripcion: ");
         String descripcion = scanner.nextLine();
+
         Prioridad prioridad = leerPrioridad();
         LocalDate fechaLimite = leerFecha("Fecha limite");
 
-        // JOIN: se detiene el hilo antes de guardar el elemento
-        autoGuardar.detener();
-
         int id = usuarioActual.getElementos().size() + 1;
+
+        // Crear la tarea ANTES del hilo para que el hilo tenga acceso a sus datos
         Tarea tarea = new Tarea(id, titulo, descripcion, prioridad, Estado.PENDIENTE, fechaLimite);
+
+        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
+        AutoGuardarThread autoSave = new AutoGuardarThread("Tarea", tarea);
+        autoSave.start();
+
+        // Verificar auto-guardado durante la entrada de datos
+        if (autoSave.hayMensajePendiente()) {
+            autoSave.mostrarAutoGuardado();
+            // No pedir datos aquí, solo mostrar el mensaje
+        }
+
+        // Guardar la tarea
         usuarioActual.crearElemento(tarea);
 
-        System.out.println("Tarea guardada exitosamente.");
+        // JOIN: se detiene el hilo antes de guardar el elemento
+        autoSave.detener();
+
+        // Mostrar la tarea completa al final
+        System.out.println("\n Tarea creada exitosamente!");
+        System.out.println("═══════════════════════════════════════");
+        tarea.mostrarInfo(); // Usar el método mostrarInfo() de Elemento
+        System.out.println("═══════════════════════════════════════");
     }
 
     static void crearRecordatorio() {
         System.out.println("\n-- Crear recordatorio --");
 
-        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
-        AutoGuardarThread autoGuardar = new AutoGuardarThread("Recordatorio");
-        autoGuardar.start();
-
         System.out.print("Titulo: ");
         String titulo = scanner.nextLine();
+
         System.out.print("Descripcion: ");
         String descripcion = scanner.nextLine();
+
         Prioridad prioridad = leerPrioridad();
         LocalDate fechaLimite = leerFecha("Fecha limite del recordatorio");
 
-        // JOIN: se detiene el hilo antes de guardar el elemento
-        autoGuardar.detener();
-
         int id = usuarioActual.getElementos().size() + 1;
+
+        // Crear el recordatorio ANTES del hilo
         Recordatorio recordatorio = new Recordatorio(id, titulo, descripcion, prioridad, fechaLimite);
+
+        // Iniciar hilo de auto-guardado con el recordatorio
+        AutoGuardarThread autoSave = new AutoGuardarThread("Recordatorio", recordatorio);
+        autoSave.start();
+
+        // Verificar auto-guardado
+        if (autoSave.hayMensajePendiente()) {
+            autoSave.mostrarAutoGuardado();
+        }
+
+        // Guardar el recordatorio
         usuarioActual.crearElemento(recordatorio);
 
-        System.out.println("Recordatorio guardado exitosamente.");
+        // Detener el hilo
+        autoSave.detener();
+
+        // Mostrar el recordatorio completo al final
+        System.out.println("\n✅ Recordatorio creado exitosamente!");
+        System.out.println("═══════════════════════════════════════");
+        recordatorio.mostrarInfo();
+        System.out.println("═══════════════════════════════════════");
     }
 
     static void compartirElemento() {
