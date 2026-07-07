@@ -1,10 +1,20 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'org.example'
 version = '1.0'
+
+layout.buildDirectory = file("C:/build-proyectopoo")
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+    destinationDir = file("C:/javadoc-proyectopoo")
+}
 
 java {
     toolchain {
@@ -12,12 +22,17 @@ java {
     }
 }
 
+javafx {
+    version = "21"
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
 application {
-    mainClass = 'Main'
+    mainClass = 'sistemagestiontareas.App'
 }
 
 run {
-    standardInput =System.in
+    standardInput = System.in
 }
 
 repositories {
@@ -25,6 +40,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.postgresql:postgresql:42.7.3'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 }
 
