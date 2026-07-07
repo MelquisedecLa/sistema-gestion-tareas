@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  auth.fxml — Pantalla de autenticación (Login y Registro)
+  Controlador: sistemagestiontareas.gui.AuthView  (patrón fx:root)
+  Entregable 3 — Interfaz gráfica y persistencia
+-->
+<fx:root type="javafx.scene.layout.VBox"
+         xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/17"
+         spacing="15"
+         alignment="TOP_CENTER">
+
+    <!-- Definición del ToggleGroup compartido por los RadioButton de tipo de usuario -->
+    <fx:define>
+        <ToggleGroup fx:id="grupoTipo"/>
+    </fx:define>
+
+    <padding>
+        <Insets topRightBottomLeft="20"/>
+    </padding>
+
+    <!-- Título principal -->
+    <Label text="Sistema de Gestion de Tareas Colaborativas"
+           wrapText="true"
+           style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <!-- Pestañas: Login | Registro -->
+    <TabPane tabClosingPolicy="UNAVAILABLE">
+
+        <!-- ══════════════ TAB: Iniciar sesion ══════════════ -->
+        <Tab text="Iniciar sesion">
+            <content>
+                <GridPane hgap="10" vgap="12">
+                    <padding><Insets topRightBottomLeft="20"/></padding>
+
+                    <Label text="Email:"
+                           GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <TextField fx:id="campoEmailLogin"
+                               promptText="correo@ejemplo.com"
+                               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Password:"
+                           GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <PasswordField fx:id="campoPasswordLogin"
+                                  GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Button text="Iniciar sesion"
+                            defaultButton="true"
+                            onAction="#accionIniciarSesion"
+                            GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                    <!-- Mensaje de error/éxito -->
+                    <Label fx:id="mensajeLogin"
+                           wrapText="true" maxWidth="380"
+                           style="-fx-text-fill: #c62828;"
+                           GridPane.columnIndex="0" GridPane.rowIndex="3"
+                           GridPane.columnSpan="2147483647"/>
+                </GridPane>
+            </content>
+        </Tab>
+
+        <!-- ══════════════ TAB: Registrarse ══════════════ -->
+        <Tab text="Registrarse">
+            <content>
+                <ScrollPane fitToWidth="true">
+                    <content>
+                        <GridPane hgap="10" vgap="10">
+                            <padding><Insets topRightBottomLeft="20"/></padding>
+
+                            <!-- Datos básicos -->
+                            <Label text="Nombre:"
+                                   GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                            <TextField fx:id="campoNombre"
+                                       GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                            <Label text="Email:"
+                                   GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                            <TextField fx:id="campoEmailReg"
+                                       promptText="correo@ejemplo.com"
+                                       GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                            <Label text="Password:"
+                                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                            <PasswordField fx:id="campoPasswordReg"
+                                          promptText="minimo 8 caracteres"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                            <!-- Tipo de usuario -->
+                            <Label text="Tipo de usuario:"
+                                   GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                            <VBox spacing="5"
+                                  GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                <RadioButton fx:id="radioClasico"
+                                             text="Clasico (maximo 3 elementos)"
+                                             selected="true"
+                                             toggleGroup="$grupoTipo"/>
+                                <RadioButton fx:id="radioPremium"
+                                             text="Premium (sin limite)"
+                                             toggleGroup="$grupoTipo"/>
+                            </VBox>
+
+                            <!-- Panel de pago (solo visible cuando Premium está seleccionado) -->
+                            <VBox fx:id="panelPago" spacing="10"
+                                  visible="false" managed="false"
+                                  GridPane.columnIndex="0" GridPane.rowIndex="4"
+                                  GridPane.columnSpan="2147483647">
+
+                                <Label text="Metodo de pago:" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="comboMetodoPago"/>
+
+                                <!-- Sub-panel: Tarjeta de crédito / débito -->
+                                <GridPane fx:id="panelTarjeta" hgap="10" vgap="8">
+                                    <Label text="Numero de tarjeta:"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                    <TextField fx:id="campoNumeroTarjeta"
+                                               promptText="16 digitos"
+                                               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                    <Label text="Vencimiento (MM/YY):"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                    <TextField fx:id="campoVencimiento"
+                                               promptText="MM/YY"
+                                               GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                    <Label text="Titular:"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                    <TextField fx:id="campoTitular"
+                                               promptText="Nombre del titular"
+                                               GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                    <Label text="CVV:"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                    <TextField fx:id="campoCvv"
+                                               promptText="3 digitos"
+                                               GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                </GridPane>
+
+                                <!-- Sub-panel: PayPal (oculto por defecto) -->
+                                <GridPane fx:id="panelPaypal" hgap="10" vgap="8"
+                                          visible="false" managed="false">
+                                    <Label text="Correo de PayPal:"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                    <TextField fx:id="campoCorreoPaypal"
+                                               promptText="correo@paypal.com"
+                                               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                    <Label text="Contrasena de PayPal:"
+                                           GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                    <PasswordField fx:id="campoPasswordPaypal"
+                                                  GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                </GridPane>
+                            </VBox>
+
+                            <!-- Botón registrar y mensaje -->
+                            <Button text="Registrarse"
+                                    onAction="#accionRegistrar"
+                                    GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                            <Label fx:id="mensajeRegistro"
+                                   wrapText="true" maxWidth="380"
+                                   style="-fx-text-fill: #c62828;"
+                                   GridPane.columnIndex="0" GridPane.rowIndex="6"
+                                   GridPane.columnSpan="2147483647"/>
+                        </GridPane>
+                    </content>
+                </ScrollPane>
+            </content>
+        </Tab>
+    </TabPane>
+</fx:root>

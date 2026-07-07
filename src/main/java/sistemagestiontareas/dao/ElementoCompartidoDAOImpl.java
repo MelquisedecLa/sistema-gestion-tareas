@@ -54,6 +54,22 @@ public class ElementoCompartidoDAOImpl implements ElementoCompartidoDAO {
         }
     }
     @Override
+    public int contarUsuariosCompartidos(int elementoId) {
+        Connection con = conexion.getConexion();
+        String sql = "SELECT COUNT(*) FROM elementos_compartidos WHERE elemento_id = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, elementoId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al contar usuarios compartidos: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
     public List<Integer> buscarIdsCompartidosConUsuario(int usuarioId) {
         Connection con = conexion.getConexion();
         String sql = "SELECT elemento_id FROM elementos_compartidos WHERE usuario_id = ?";

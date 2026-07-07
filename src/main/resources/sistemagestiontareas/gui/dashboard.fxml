@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+  dashboard.fxml — Pantalla principal del sistema (post-login)
+  Controlador: sistemagestiontareas.gui.DashboardView  (patrón fx:root)
+  Entregable 3 — Interfaz gráfica y persistencia
+-->
+<fx:root type="javafx.scene.layout.BorderPane"
+         xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/17">
+
+    <padding>
+        <Insets topRightBottomLeft="15"/>
+    </padding>
+
+    <!-- ══════════════ ENCABEZADO (TOP) ══════════════ -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="0" right="0" bottom="10" left="0"/>
+            </padding>
+
+            <!-- Zona izquierda: nombre de usuario e info de tipo/membresía -->
+            <HBox fx:id="boxIzquierda" spacing="15" alignment="CENTER_LEFT"
+                  HBox.hgrow="SOMETIMES">
+                <Label fx:id="etiquetaNombre"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <Label fx:id="etiquetaInfo"
+                       style="-fx-text-fill: #555555;"/>
+            </HBox>
+
+            <!-- Espaciador flexible -->
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Botón cerrar sesión -->
+            <Button text="Cerrar sesion" onAction="#accionCerrarSesion"/>
+        </HBox>
+    </top>
+
+    <!-- ══════════════ CONTENIDO CENTRAL ══════════════ -->
+    <center>
+        <VBox spacing="10">
+
+            <Label text="Mis tareas y recordatorios:"
+                   style="-fx-font-weight: bold;"/>
+
+            <!-- Lista principal de elementos con celda personalizada -->
+            <ListView fx:id="listaElementos" prefHeight="400">
+                <placeholder>
+                    <Label text="No tienes tareas ni recordatorios todavia."/>
+                </placeholder>
+            </ListView>
+
+            <!-- Barra de acciones -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <padding>
+                    <Insets top="10" right="0" bottom="0" left="0"/>
+                </padding>
+                <Button text="Nueva tarea"         onAction="#accionNuevaTarea"/>
+                <Button text="Nuevo recordatorio"  onAction="#accionNuevoRecordatorio"/>
+                <Button text="Cambiar estado"      onAction="#accionCambiarEstado"/>
+                <Button text="Reprogramar fecha"   onAction="#accionReprogramar"/>
+                <Button text="Compartir"           onAction="#accionCompartir"/>
+                <Button text="Actualizar lista"    onAction="#accionActualizar"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <!-- ══════════════ LEYENDA (BOTTOM) ══════════════ -->
+    <bottom>
+        <HBox>
+            <padding>
+                <Insets top="10" right="0" bottom="0" left="0"/>
+            </padding>
+            <Label text="Prioridad -> rojo: ALTA   naranja: MEDIA   verde: BAJA        Icono -> 🔔 Recordatorio   ✅ Tarea"
+                   style="-fx-font-size: 11px; -fx-text-fill: #666666;"/>
+        </HBox>
+    </bottom>
+
+</fx:root>
