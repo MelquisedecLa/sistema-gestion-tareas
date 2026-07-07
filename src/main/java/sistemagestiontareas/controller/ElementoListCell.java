@@ -10,6 +10,8 @@ import sistemagestiontareas.enums.Prioridad;
 import sistemagestiontareas.model.Elemento;
 import sistemagestiontareas.model.Recordatorio;
 import sistemagestiontareas.model.Tarea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.util.function.Consumer;
 
@@ -45,11 +47,16 @@ public class ElementoListCell extends ListCell<Elemento> {
 
         boolean esRecordatorio = elemento instanceof Recordatorio;
 
-        Label icono = new Label(esRecordatorio ? "[R]" : "[T]");
-        icono.setStyle("-fx-font-weight: bold; -fx-text-fill: #1f2937; -fx-min-width: 28;");
+        String rutaIcono = esRecordatorio
+                ? "/sistemagestiontareas/icons/icono_recordatorio.png"
+                : "/sistemagestiontareas/icons/icono_tarea.png";
 
+        ImageView icono = new ImageView(new Image(getClass().getResourceAsStream(rutaIcono)));
+        icono.setFitWidth(20);
+        icono.setFitHeight(20);
+        icono.setPreserveRatio(true);
         Label titulo = new Label(elemento.getTitulo());
-        titulo.setStyle("-fx-font-weight: bold; -fx-text-fill: #1f2937;");
+        titulo.setStyle("-fx-font-weight: bold; -fx-text-fill: #3b2f2a;");
 
         String detalle = elemento.getDescripcion();
         if (elemento instanceof Tarea tarea) {
@@ -91,7 +98,7 @@ public class ElementoListCell extends ListCell<Elemento> {
 
         String colorFondo = colorPorPrioridad(elemento.getPrioridad());
         String borde = isSelected()
-                ? "-fx-border-color: #2563eb; -fx-border-width: 2; -fx-border-radius: 4;"
+                ? "-fx-border-color: #5c4433; -fx-border-width: 2; -fx-border-radius: 4;"
                 : "-fx-border-width: 0;";
         setStyle(colorFondo + borde);
     }
@@ -102,9 +109,9 @@ public class ElementoListCell extends ListCell<Elemento> {
 
     private String colorPorPrioridad(Prioridad prioridad) {
         return switch (prioridad) {
-            case ALTA -> "-fx-background-color: #fecaca;";
-            case MEDIA -> "-fx-background-color: #fef3c7;";
-            case BAJA -> "-fx-background-color: #bbf7d0;";
+            case ALTA -> "-fx-background-color: #e3b5a4;";
+            case MEDIA -> "-fx-background-color: #eecd9c;";
+            case BAJA -> "-fx-background-color: #cdd9b8;";
         };
     }
 }

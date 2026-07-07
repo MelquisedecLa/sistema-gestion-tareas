@@ -9,6 +9,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.application.Platform;
+import sistemagestiontareas.thread.ColaboradorThread;
 import sistemagestiontareas.App;
 import sistemagestiontareas.Sesion;
 import sistemagestiontareas.dao.RecordatorioDAO;
@@ -100,7 +102,9 @@ public class MainController {
             Stage modal = new Stage();
             modal.initModality(Modality.APPLICATION_MODAL);
             modal.setTitle("Nueva Tarea");
-            modal.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+            modal.setScene(scene);
             modal.showAndWait();
 
             if (controller.isGuardado()) {
@@ -140,7 +144,9 @@ public class MainController {
             Stage modal = new Stage();
             modal.initModality(Modality.APPLICATION_MODAL);
             modal.setTitle("Nuevo Recordatorio");
-            modal.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+            modal.setScene(scene);
             modal.showAndWait();
 
             if (controller.isGuardado()) {
@@ -178,7 +184,9 @@ public class MainController {
                 Stage modal = new Stage();
                 modal.initModality(Modality.APPLICATION_MODAL);
                 modal.setTitle("Editar Tarea");
-                modal.setScene(new Scene(root));
+                Scene scene = new Scene(root);
+                scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+                modal.setScene(scene);
                 modal.showAndWait();
 
                 if (controller.isGuardado()) {
@@ -199,7 +207,9 @@ public class MainController {
                 Stage modal = new Stage();
                 modal.initModality(Modality.APPLICATION_MODAL);
                 modal.setTitle("Editar Recordatorio");
-                modal.setScene(new Scene(root));
+                Scene scene = new Scene(root);
+                scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+                modal.setScene(scene);
                 modal.showAndWait();
 
                 if (controller.isGuardado()) {
@@ -241,6 +251,7 @@ public class MainController {
         dialog.setTitle("Cambiar estado");
         dialog.setHeaderText("Tarea: " + tarea.getTitulo());
         dialog.setContentText("Nuevo estado:");
+        aplicarEstilo(dialog);
 
         Optional<Estado> resultado = dialog.showAndWait();
         resultado.ifPresent(nuevoEstado -> {
@@ -259,6 +270,7 @@ public class MainController {
         Dialog<LocalDate> dialog = new Dialog<>();
         dialog.setTitle("Reprogramar recordatorio");
         dialog.setHeaderText("Recordatorio: " + recordatorio.getTitulo());
+        aplicarEstilo(dialog);
 
         DatePicker datePicker = new DatePicker(recordatorio.getFechaLimite());
         dialog.getDialogPane().setContent(datePicker);
@@ -287,6 +299,18 @@ public class MainController {
         }
 
         Usuario actual = Sesion.getUsuarioActual();
+
+        if (actual instanceof UsuarioClasico) {
+            if (!(seleccionado instanceof Tarea)) {
+                mostrarAdvertencia("Los usuarios Clásicos solo pueden compartir tareas, no recordatorios.");
+                return;
+            }
+            if (compartidoDAO.usuarioClasicoYaComparta(actual.getId())) {
+                mostrarAdvertencia("Como usuario Clásico, ya usaste tu única oportunidad de compartir un elemento.");
+                return;
+            }
+        }
+
         List<Usuario> candidatos = usuarioDAO.buscarTodos();
         candidatos.removeIf(u -> u.getId() == actual.getId());
 
@@ -304,6 +328,7 @@ public class MainController {
         dialog.setTitle("Compartir elemento");
         dialog.setHeaderText("Compartir \"" + seleccionado.getTitulo() + "\" con:");
         dialog.setContentText("Usuario:");
+        aplicarEstilo(dialog);
 
         Optional<String> resultado = dialog.showAndWait();
         resultado.ifPresent(seleccionUsuario -> {
@@ -320,6 +345,15 @@ public class MainController {
             try {
                 compartidoDAO.compartir(seleccionado.getId(), destino.getId());
                 mostrarInfo("Compartido con " + destino.getNombre() + " correctamente.");
+
+                // Simula que el usuario destino accede/modifica la tarea al mismo tiempo (concurrencia)
+                if (seleccionado instanceof Tarea tareaCompartida) {
+                    ColaboradorThread hilo = new ColaboradorThread(
+                            "Colaborador-" + destino.getNombre(), tareaCompartida, destino, 3);
+                    hilo.setAlTerminarOperacion(() -> Platform.runLater(listViewElementos::refresh));
+                    hilo.setDaemon(true);
+                    hilo.start();
+                }
             } catch (RuntimeException e) {
                 mostrarError("No se pudo compartir el elemento.");
                 e.printStackTrace();
@@ -336,23 +370,28 @@ public class MainController {
             e.printStackTrace();
         }
     }
-
     private void mostrarError(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR, mensaje);
         alerta.setHeaderText(null);
+        aplicarEstilo(alerta);
         alerta.showAndWait();
     }
 
     private void mostrarAdvertencia(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.WARNING, mensaje);
         alerta.setHeaderText(null);
+        aplicarEstilo(alerta);
         alerta.showAndWait();
     }
 
     private void mostrarInfo(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION, mensaje);
         alerta.setHeaderText(null);
+        aplicarEstilo(alerta);
         alerta.showAndWait();
+    }
+    private void aplicarEstilo(javafx.scene.control.Dialog<?> dialog) {
+        dialog.getDialogPane().getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
     }
     private int contarElementosDeUsuario(int usuarioId) {
         return tareaDAO.buscarPorUsuario(usuarioId).size()

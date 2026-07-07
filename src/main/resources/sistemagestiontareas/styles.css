@@ -1,9 +1,14 @@
 .root {
     -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #f5efe6;
+}
+
+.label {
+    -fx-text-fill: #3b2f2a;
 }
 
 .button {
-    -fx-background-color: #3b82f6;
+    -fx-background-color: #8b6f52;
     -fx-text-fill: white;
     -fx-background-radius: 6;
     -fx-padding: 8 16;
@@ -11,33 +16,81 @@
 }
 
 .button:hover {
-    -fx-background-color: #2563eb;
+    -fx-background-color: #6b5440;
 }
 
-.text-field, .password-field {
+.text-field, .password-field, .text-area, .combo-box, .date-picker {
     -fx-background-radius: 6;
     -fx-padding: 8;
-    -fx-border-color: #d1d5db;
+    -fx-border-color: #d8c9b0;
     -fx-border-radius: 6;
+    -fx-background-color: #fffaf3;
+    -fx-prompt-text-fill: #a9987e;
 }
 
 .list-view {
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: #d8c9b0;
     -fx-border-radius: 6;
+    -fx-background-color: #fffaf3;
 }
+
 .button-enlace, .button-enlace:hover, .button-enlace:pressed, .button-enlace:armed, .button-enlace:focused {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
-    -fx-text-fill: #2563eb;
+    -fx-text-fill: #8b6f52;
     -fx-underline: false;
     -fx-padding: 4 0;
     -fx-effect: none;
 }
+
 .button-enlace:hover {
-    -fx-text-fill: #1d4ed8;
+    -fx-text-fill: #6b5440;
     -fx-underline: true;
 }
+.root {
+    -fx-focus-color: #8b6f52;
+    -fx-faint-focus-color: #8b6f5233;
+}
 
-.text-field, .password-field, .text-area {
-    -fx-prompt-text-fill: #9ca3af;
+.button:default, .button:default:hover {
+    -fx-background-color: #8b6f52;
+}
+.button:default:hover {
+    -fx-background-color: #6b5440;
+}
+
+.card {
+    -fx-background-color: #fffaf3;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(59,47,42,0.15), 14, 0, 0, 4);
+}
+
+.field-label {
+    -fx-text-fill: #6b5440;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.title-label {
+    -fx-text-fill: #3b2f2a;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.dialog-pane {
+    -fx-background-color: #f5efe6;
+}
+.dialog-pane > *.button-bar > *.container {
+    -fx-background-color: transparent;
+}
+.dialog-pane .content.label {
+    -fx-text-fill: #3b2f2a;
+    -fx-font-size: 13px;
+}
+.dialog-pane:header .header-panel {
+    -fx-background-color: #f5efe6;
+}
+.dialog-pane:header .header-panel .label {
+    -fx-text-fill: #3b2f2a;
+    -fx-font-weight: bold;
 }

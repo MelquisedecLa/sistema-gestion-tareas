@@ -2,6 +2,7 @@ package sistemagestiontareas.model;
 
 import sistemagestiontareas.enums.Estado;
 import sistemagestiontareas.enums.Prioridad;
+import sistemagestiontareas.model.Usuario;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,6 @@ public class Tarea extends Elemento {
                 nuevoEstado
         );
     }
-
     /**
      * Agrega un colaborador a la tarea de forma sincronizada.
      *

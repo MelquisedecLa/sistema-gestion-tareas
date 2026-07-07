@@ -71,4 +71,20 @@ public class ElementoCompartidoDAOImpl implements ElementoCompartidoDAO {
             throw new RuntimeException("Error al buscar los elementos compartidos: " + e.getMessage(), e);
         }
     }
-}
+        @Override
+        public boolean usuarioClasicoYaComparta(int propietarioId) {
+            Connection con = conexion.getConexion();
+            String sql = "SELECT COUNT(DISTINCT ec.elemento_id) FROM elementos_compartidos ec " +
+                    "JOIN elementos e ON e.id = ec.elemento_id WHERE e.usuario_id = ?";
+
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, propietarioId);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                return rs.getInt(1) > 0;
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Error al verificar elementos compartidos: " + e.getMessage(), e);
+            }
+        }
+    }

@@ -5,6 +5,7 @@ import java.util.List;
 
 public interface ElementoCompartidoDAO {
 
+    boolean usuarioClasicoYaComparta(int propietarioId);
     boolean compartir(int elementoId, int usuarioId);
     List<Usuario> buscarUsuariosCompartidos(int elementoId);
     List<Integer> buscarIdsCompartidosConUsuario(int usuarioId);
