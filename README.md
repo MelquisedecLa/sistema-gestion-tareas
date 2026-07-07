@@ -255,3 +255,9 @@ Para generar la documentación HTML del proyecto:
 ```
 
 La documentación se genera en `C:\javadoc-proyectopoo\index.html` y puede abrirse en cualquier navegador web.
+
+Para abrirla directamente desde la terminal:
+
+```powershell
+start C:\javadoc-proyectopoo\index.html
+```
