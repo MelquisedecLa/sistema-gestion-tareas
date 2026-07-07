@@ -254,53 +254,84 @@ public class Main {
     static void crearTarea() {
         System.out.println("\n-- Crear tarea --");
 
-        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
-        AutoGuardarThread autoGuardar = new AutoGuardarThread("Tarea");
-        autoGuardar.start();
-
         System.out.print("Titulo: ");
         String titulo = scanner.nextLine();
         while (titulo.trim().isEmpty()) {
             System.out.print("El titulo no puede estar vacio: ");
             titulo = scanner.nextLine();
         }
+
         System.out.print("Descripcion: ");
         String descripcion = scanner.nextLine();
+
         Prioridad prioridad = leerPrioridad();
         LocalDate fechaLimite = leerFecha("Fecha limite");
 
-        // JOIN: se detiene el hilo antes de guardar el elemento
-        autoGuardar.detener();
-
         int id = usuarioActual.getElementos().size() + 1;
+
+        // Crear la tarea ANTES del hilo para que el hilo tenga acceso a sus datos
         Tarea tarea = new Tarea(id, titulo, descripcion, prioridad, Estado.PENDIENTE, fechaLimite);
+
+        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
+        AutoGuardarThread autoSave = new AutoGuardarThread("Tarea", tarea);
+        autoSave.start();
+
+        // Verificar auto-guardado durante la entrada de datos
+        if (autoSave.hayMensajePendiente()) {
+            autoSave.mostrarAutoGuardado();
+            // No pedir datos aquí, solo mostrar el mensaje
+        }
+
+        // Guardar la tarea
         usuarioActual.crearElemento(tarea);
 
-        System.out.println("Tarea guardada exitosamente.");
+        // JOIN: se detiene el hilo antes de guardar el elemento
+        autoSave.detener();
+
+        // Mostrar la tarea completa al final
+        System.out.println("\n Tarea creada exitosamente!");
+        System.out.println("═══════════════════════════════════════");
+        tarea.mostrarInfo(); // Usar el método mostrarInfo() de Elemento
+        System.out.println("═══════════════════════════════════════");
     }
 
     static void crearRecordatorio() {
         System.out.println("\n-- Crear recordatorio --");
 
-        // FORK: AutoGuardarThread corre en paralelo mientras el usuario llena los datos
-        AutoGuardarThread autoGuardar = new AutoGuardarThread("Recordatorio");
-        autoGuardar.start();
-
         System.out.print("Titulo: ");
         String titulo = scanner.nextLine();
+
         System.out.print("Descripcion: ");
         String descripcion = scanner.nextLine();
+
         Prioridad prioridad = leerPrioridad();
         LocalDate fechaLimite = leerFecha("Fecha limite del recordatorio");
 
-        // JOIN: se detiene el hilo antes de guardar el elemento
-        autoGuardar.detener();
-
         int id = usuarioActual.getElementos().size() + 1;
+
+        // Crear el recordatorio ANTES del hilo
         Recordatorio recordatorio = new Recordatorio(id, titulo, descripcion, prioridad, fechaLimite);
+
+        // Iniciar hilo de auto-guardado con el recordatorio
+        AutoGuardarThread autoSave = new AutoGuardarThread("Recordatorio", recordatorio);
+        autoSave.start();
+
+        // Verificar auto-guardado
+        if (autoSave.hayMensajePendiente()) {
+            autoSave.mostrarAutoGuardado();
+        }
+
+        // Guardar el recordatorio
         usuarioActual.crearElemento(recordatorio);
 
-        System.out.println("Recordatorio guardado exitosamente.");
+        // Detener el hilo
+        autoSave.detener();
+
+        // Mostrar el recordatorio completo al final
+        System.out.println("\n✅ Recordatorio creado exitosamente!");
+        System.out.println("═══════════════════════════════════════");
+        recordatorio.mostrarInfo();
+        System.out.println("═══════════════════════════════════════");
     }
 
     static void compartirElemento() {
@@ -312,9 +343,54 @@ public class Main {
 
         System.out.println("\n-- Compartir elemento --");
         for (int i = 0; i < elementos.size(); i++)
-            System.out.println((i + 1) + ". " + elementos.get(i).getTitulo());
+            System.out.println((i + 1) + ". " + elementos.get(i).getTitulo() +
+                    " [" + elementos.get(i).getClass().getSimpleName() + "]");
         System.out.print("Selecciona elemento: ");
         int idxElemento = leerInt() - 1;
+
+        if (idxElemento < 0 || idxElemento >= elementos.size()) {
+            System.out.println("Selección inválida.");
+            return;
+        }
+
+        Elemento elementoACompartir = elementos.get(idxElemento);
+
+        // ========== VALIDACIÓN PARA USUARIO CLÁSICO ==========
+        if (usuarioActual instanceof UsuarioClasico) {
+
+            //Verificar si el usuario Clásico YA compartió una tarea antes
+            int tareasCompartidas = contarTareasCompartidasPorClasico(usuarioActual);
+            if (tareasCompartidas >= 1) {
+                System.out.println("Los usuarios Clásicos solo pueden compartir UNA tarea en total.");
+                System.out.println("Ya has compartido una tarea con otro usuario.");
+                System.out.println("No puedes compartir más elementos.");
+                return;
+            }
+
+            //Verificar que el elemento sea una Tarea (no puede compartir recordatorios)
+            if (!(elementoACompartir instanceof Tarea)) {
+                System.out.println("Los usuarios Clásicos solo pueden compartir TAREAS.");
+                System.out.println("No puedes compartir recordatorios.");
+                return;
+            }
+
+            //Verificar que la tarea NO haya sido compartida ya con alguien
+            Tarea tarea = (Tarea) elementoACompartir;
+            boolean yaCompartida = false;
+            for (Usuario u : tarea.getUsuariosCompartidos()) {
+                if (!u.equals(usuarioActual)) {
+                    yaCompartida = true;
+                    break;
+                }
+            }
+
+            if (yaCompartida) {
+                System.out.println("Esta tarea ya fue compartida con otro usuario.");
+                System.out.println("Solo puedes compartir UNA tarea una sola vez.");
+                return;
+            }
+        }
+        // =====================================================
 
         List<Usuario> otros = new ArrayList<>();
         for (Usuario u : usuarios)
@@ -327,21 +403,101 @@ public class Main {
 
         System.out.println("Usuarios disponibles:");
         for (int i = 0; i < otros.size(); i++)
-            System.out.println((i + 1) + ". " + otros.get(i).getNombre());
+            System.out.println((i + 1) + ". " + otros.get(i).getNombre() +
+                    " (" + otros.get(i).getEmail() + ")");
         System.out.print("Selecciona usuario: ");
         int idxUsuario = leerInt() - 1;
 
-        if (idxElemento >= 0 && idxElemento < elementos.size()
-                && idxUsuario >= 0 && idxUsuario < otros.size()) {
-            Elemento elementoACompartir = elementos.get(idxElemento);
-            Usuario usuarioDestino = otros.get(idxUsuario);
-            usuarioActual.compartirElemento(elementoACompartir, usuarioDestino);
-            elementoACompartir.getUsuariosCompartidos().add(usuarioActual);
-            usuarioDestino.crearElemento(elementoACompartir);
-            System.out.println("Elemento agregado a la lista de " + usuarioDestino.getNombre());
-        } else {
-            System.out.println("Seleccion invalida.");
+        if (idxUsuario < 0 || idxUsuario >= otros.size()) {
+            System.out.println("Selección inválida.");
+            return;
         }
+
+        Usuario usuarioDestino = otros.get(idxUsuario);
+
+        // ========== VALIDACIÓN: Usuario destino Clásico con límite de elementos ==========
+        if (usuarioDestino instanceof UsuarioClasico clasico) {
+            int elementosDestino = usuarioDestino.getElementos().size();
+            if (elementosDestino >= clasico.getLimiteElementos()) {
+                System.out.println(usuarioDestino.getNombre() +
+                        " ya tiene " + clasico.getLimiteElementos() +
+                        " elementos (límite de usuario Clásico).");
+                System.out.println("   Debe eliminar algún elemento antes de recibir más.");
+                return;
+            }
+        }
+
+        if (usuarioActual instanceof UsuarioClasico) {
+            System.out.println("\nADVERTENCIA: Como usuario Clásico, esta será tu ÚNICA");
+            System.out.println("   oportunidad de compartir una tarea. Después de esto,");
+            System.out.println("   no podrás compartir ningún otro elemento.");
+            System.out.print("\n¿Estás seguro de continuar? (s/n): ");
+            String confirmacion = scanner.nextLine();
+            if (!confirmacion.equalsIgnoreCase("s")) {
+                System.out.println("Operación cancelada.");
+                return;
+            }
+        }
+        //Agregar a la lista de usuarios compartidos del elemento
+        if (!elementoACompartir.getUsuariosCompartidos().contains(usuarioDestino)) {
+            elementoACompartir.getUsuariosCompartidos().add(usuarioDestino);
+        }
+        if (!elementoACompartir.getUsuariosCompartidos().contains(usuarioActual)) {
+            elementoACompartir.getUsuariosCompartidos().add(usuarioActual);
+        }
+
+        //Agregar el elemento a la lista del usuario destino
+        usuarioDestino.crearElemento(elementoACompartir);
+
+        //Si es Tarea, agregar como colaborador
+        if (elementoACompartir instanceof Tarea tarea) {
+            tarea.agregarColaborador(usuarioDestino);
+            if (!tarea.esColaborador(usuarioActual)) {
+                tarea.agregarColaborador(usuarioActual);
+            }
+            System.out.println(usuarioDestino.getNombre() +
+                    " ahora es colaborador de la tarea: " + tarea.getTitulo());
+        }
+
+        System.out.println("Elemento compartido exitosamente con " + usuarioDestino.getNombre());
+
+        // Mensaje adicional para Clásico
+        if (usuarioActual instanceof UsuarioClasico) {
+            System.out.println("Ya has usado tu ÚNICA oportunidad de compartir.");
+            System.out.println(" No podrás compartir ningún otro elemento.");
+        }
+        // ============================================================
+    }
+
+    /**
+     * Cuenta cuántas tareas ha compartido un usuario Clásico con otros usuarios.
+     * (Excluyendo al propietario)
+     */
+    static int contarTareasCompartidasPorClasico(Usuario usuario) {
+        if (!(usuario instanceof UsuarioClasico)) {
+            return 0;
+        }
+
+        int contador = 0;
+        for (Elemento e : usuario.getElementos()) {
+            if (e instanceof Tarea tarea) {
+                // Verificar si la tarea ha sido compartida con alguien más
+                for (Usuario u : tarea.getUsuariosCompartidos()) {
+                    if (!u.equals(usuario)) {
+                        contador++;
+                        break; // Cada tarea cuenta una sola vez
+                    }
+                }
+            }
+        }
+        return contador;
+    }
+
+    /**
+     * Verifica si un elemento ya fue compartido con un usuario específico.
+     */
+    static boolean yaCompartidoConUsuario(Elemento elemento, Usuario usuario) {
+        return elemento.getUsuariosCompartidos().contains(usuario);
     }
 
     static void cambiarEstadoTarea() {

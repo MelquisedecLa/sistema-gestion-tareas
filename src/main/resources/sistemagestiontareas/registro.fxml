@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" prefWidth="440.0" prefHeight="560.0"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sistemagestiontareas.controller.RegistroController">
+    <VBox alignment="TOP_CENTER" spacing="10.0">
+        <padding>
+            <Insets top="25" bottom="25" left="40" right="40"/>
+        </padding>
+
+        <Label text="Registro de Usuario" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+        <TextField fx:id="campoNombre" promptText="Nombre completo"/>
+        <TextField fx:id="campoEmail" promptText="Correo electrónico"/>
+        <PasswordField fx:id="campoPassword" promptText="Contraseña (mínimo 8 caracteres)"/>
+
+        <HBox spacing="20" alignment="CENTER">
+            <RadioButton fx:id="radioClasico" text="Clásico" selected="true">
+                <toggleGroup>
+                    <ToggleGroup fx:id="tipoUsuarioGroup"/>
+                </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="radioPremium" text="Premium" toggleGroup="$tipoUsuarioGroup"/>
+        </HBox>
+
+        <Label fx:id="labelLimiteClasico"
+               text="Los usuarios Clásicos pueden crear un máximo de 3 elementos (tareas/recordatorios)."
+               wrapText="true" style="-fx-text-fill: #6b7280; -fx-font-size: 11px;"/>
+
+        <VBox fx:id="panelPago" spacing="8" visible="false" managed="false" style="-fx-padding: 8 0 0 0;">
+            <Label text="Método de pago (requerido para Premium)" style="-fx-font-weight: bold;"/>
+            <ComboBox fx:id="comboMetodoPago" maxWidth="Infinity" promptText="Selecciona un método"/>
+
+            <VBox fx:id="panelTarjeta" spacing="8" visible="false" managed="false">
+                <TextField fx:id="campoNumeroTarjeta" promptText="Número de tarjeta (16 dígitos)"/>
+                <TextField fx:id="campoFechaExpiracion" promptText="Vencimiento (MM/YY)"/>
+                <TextField fx:id="campoTitular" promptText="Nombre del titular"/>
+                <TextField fx:id="campoCvv" promptText="CVV (3 dígitos)"/>
+            </VBox>
+
+            <VBox fx:id="panelPaypal" spacing="8" visible="false" managed="false">
+                <TextField fx:id="campoEmailPaypal" promptText="Correo de PayPal"/>
+                <PasswordField fx:id="campoPasswordPaypal" promptText="Contraseña de PayPal"/>
+            </VBox>
+        </VBox>
+
+        <Label fx:id="labelError" style="-fx-text-fill: red;" wrapText="true"/>
+
+        <Button text="Registrarse" onAction="#onRegistrar" defaultButton="true"/>
+        <Button text="¿Ya tienes cuenta? Inicia sesión" onAction="#onIrALogin" styleClass="button-enlace"/>
+    </VBox>
+</ScrollPane>
