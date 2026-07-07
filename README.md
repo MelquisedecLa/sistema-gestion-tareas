@@ -39,7 +39,7 @@ Los usuarios pueden **crear, organizar y compartir tareas y recordatorios**, los
 
 ---
 
-## Estructura de Entregables
+## Patrones de Diseño e Hilos Aplicados
 
 ### 1. Modelado y Estructura Inicial ✅ Completado
 
@@ -77,7 +77,9 @@ Los usuarios pueden **crear, organizar y compartir tareas y recordatorios**, los
 - Control de límite de elementos para `UsuarioClasico` (máximo 3)
 - Documentación Javadoc generada para todas las clases activas
 
----
+Bash
+./gradlew build
+Ejecución de la Consola Interactiva:
 
 ## Patrones de Diseño e Hilos Aplicados
 
@@ -97,7 +99,20 @@ Al abrir el formulario de creación de una tarea o recordatorio, el sistema real
 - **Hilo Secundario (`AutoGuardarThread`):** corre de forma asíncrona en segundo plano, ejecutando una rutina de autoguardado cada 5 segundos.
 - Al cerrar el formulario se realiza el **JOIN**: el hilo secundario recibe la señal de parada y termina de forma controlada.
 
----
+B. Casos de Prueba Críticos
+Validación de Límite (Usuario Clásico): Intente registrar un 4.° elemento con una cuenta de tipo UsuarioClasico. El sistema invocará a verificarLimiteTareas() y bloqueará la creación disparando la alerta de "Límite de elementos alcanzado".
+
+Comportamiento Asíncrono: Tras crear una tarea exitosamente, verifique la salida de la consola. El flujo principal le permitirá seguir navegando por los menús mientras, en intervalos de 30 segundos, el hilo secundario notificará la ejecución del demonio de autoguardado.
+
+Ejemplos Prácticos de Entrada y Salida
+Flujo de Ejecución Sincronizado en Consola
+Entrada del Usuario:
+
+Plaintext
+=== SISTEMA DE GESTIÓN DE TAREAS ===
+1. Iniciar Sesión / Registrarse
+2. Salir
+Seleccione una opción: 1
 
 ## Requisitos Previos
 
