@@ -10,7 +10,7 @@ El proyecto consiste en una **aplicación de gestión de tareas y recordatorios 
 
 Los usuarios pueden **crear, organizar y compartir tareas y recordatorios**, los cuales se visualizan en un `ListView` con información básica de cada elemento:
 
-- Las **tareas** se diferencian mediante **colores de fondo según su prioridad**: rojo (ALTA), amarillo (MEDIA) y verde (BAJA).
+- Las **tareas** se diferencian mediante **colores de fondo según su prioridad**: rojo (ALTA), naranja (MEDIA) y verde (BAJA).
 - Los **recordatorios** se identifican con el prefijo **[R]** y las tareas con **[T]** dentro de la lista.
 
 ---
@@ -19,7 +19,7 @@ Los usuarios pueden **crear, organizar y compartir tareas y recordatorios**, los
 
 - **Interfaz Gráfica con JavaFX:** Pantallas de login, registro y panel principal desarrolladas con FXML y controladores. Navegación entre escenas gestionada por la clase `App`.
 - **Persistencia en PostgreSQL:** Todas las operaciones CRUD (crear, leer, actualizar, eliminar) sobre usuarios, tareas y recordatorios se persisten en base de datos relacional mediante la capa DAO (`TareaDAOImpl`, `RecordatorioDAOImpl`, `UsuarioDAOImpl`, `ElementoCompartidoDAOImpl`).
-- **Visualización en ListView con colores por prioridad:** Las tareas y recordatorios se muestran en una lista con celdas personalizadas (`ElementoListCell`). El color de fondo indica la prioridad: rojo (ALTA), amarillo (MEDIA) y verde (BAJA).
+- **Visualización en ListView con colores por prioridad:** Las tareas y recordatorios se muestran en una lista con celdas personalizadas (`ElementoListCell`). El color de fondo indica la prioridad: rojo (ALTA), naranja (MEDIA) y verde (BAJA).
 - **Fecha y hora en recordatorios:** Los recordatorios almacenan fecha y hora límite (`LocalDateTime`), permitiendo programar recordatorios con precisión horaria.
 - **Compartir elementos entre usuarios:** Un usuario puede compartir cualquier tarea o recordatorio con otro usuario registrado, respetando el límite de elementos del destinatario.
 - **Control de membresía en tiempo real:** El sistema valida el límite de 3 elementos para `UsuarioClasico` tanto al crear como al recibir elementos compartidos.
