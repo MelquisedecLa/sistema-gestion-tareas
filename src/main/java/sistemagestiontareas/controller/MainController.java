@@ -334,6 +334,14 @@ public class MainController {
         resultado.ifPresent(seleccionUsuario -> {
             Usuario destino = opciones.get(seleccionUsuario);
 
+            // Validar limite de compartir para UsuarioClasico (maximo 1 usuario por elemento)
+            if (actual instanceof UsuarioClasico) {
+                if (compartidoDAO.contarUsuariosCompartidos(seleccionado.getId()) >= 1) {
+                    mostrarAdvertencia("Como usuario Clásico solo puedes compartir cada elemento con un máximo de 1 usuario.");
+                    return;
+                }
+            }
+
             if (destino instanceof UsuarioClasico clasico) {
                 if (contarElementosDeUsuario(destino.getId()) >= clasico.getLimiteElementos()) {
                     mostrarAdvertencia(destino.getNombre() + " ya tiene " + clasico.getLimiteElementos() +
