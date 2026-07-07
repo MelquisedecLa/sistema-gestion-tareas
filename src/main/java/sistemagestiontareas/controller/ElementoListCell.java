@@ -103,7 +103,7 @@ public class ElementoListCell extends ListCell<Elemento> {
     private String colorPorPrioridad(Prioridad prioridad) {
         return switch (prioridad) {
             case ALTA -> "-fx-background-color: #fecaca;";
-            case MEDIA -> "-fx-background-color: #fef3c7;";
+            case MEDIA -> "-fx-background-color: #fed7aa;";
             case BAJA -> "-fx-background-color: #bbf7d0;";
         };
     }
