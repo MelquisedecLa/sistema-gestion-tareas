@@ -20,6 +20,7 @@ public interface ElementoCompartidoDAO {
      * @return {@code true} si se insertó correctamente
      * @throws RuntimeException si falla la operacion
      */
+    boolean usuarioClasicoYaComparta(int propietarioId);
     boolean compartir(int elementoId, int usuarioId);
 
     /**

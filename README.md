@@ -1,96 +1,263 @@
 # Proyecto - Aplicación de Gestión de Tareas y Recordatorios
 
-Este repositorio está destinado a la entrega del proyecto de la materia, el cual se desarrollará progresivamente en **tres entregables**.
+Este repositorio contiene el desarrollo progresivo del proyecto de la materia, estructurado en tres entregables. El sistema se encuentra en su **fase final**, con interfaz gráfica completa, persistencia en base de datos relacional y concurrencia integrada.
+
+---
 
 ## Descripción del Proyecto
 
-El proyecto consiste en desarrollar una **aplicación de gestión de tareas y recordatorios colaborativos** dirigida a distintos tipos de usuarios registrados, permitiendo realizar acciones según el tipo de usuario y ofreciendo una solución escalable.
+El proyecto consiste en una **aplicación de gestión de tareas y recordatorios colaborativos** dirigida a distintos tipos de usuarios registrados. El sistema implementa controles de membresía, flujos de procesamiento de pagos flexibles y mecanismos concurrentes en segundo plano, con una interfaz gráfica desarrollada en JavaFX y persistencia en PostgreSQL.
 
-Los usuarios podrán **crear, organizar y compartir tareas y recordatorios**, los cuales se visualizarán en una lista (`ListView`) mostrando información básica de cada elemento.
+Los usuarios pueden **crear, organizar y compartir tareas y recordatorios**, los cuales se visualizan en un `ListView` con información básica de cada elemento:
 
-Para mejorar la visualización:
+- Las **tareas** se diferencian mediante **colores de fondo según su prioridad**: rojo (ALTA), naranja (MEDIA) y verde (BAJA).
+- Los **recordatorios** se identifican con el prefijo **[R]** y las tareas con **[T]** dentro de la lista.
 
-- Las **tareas** se diferenciarán mediante **colores según su prioridad**.
-- Los **recordatorios** contarán con **íconos distintivos** que los separen de las tareas.
+---
 
-## Tecnologías y Enfoque de Desarrollo
+## Características Principales (Entregable 3)
 
-El desarrollo del proyecto se realizará en **Java**, siguiendo los principios de **Programación Orientada a Objetos (POO)** y aplicando **patrones de diseño** para garantizar flexibilidad, mantenimiento y escalabilidad.
+- **Interfaz Gráfica con JavaFX:** Pantallas de login, registro y panel principal desarrolladas con FXML y controladores. Navegación entre escenas gestionada por la clase `App`.
+- **Persistencia en PostgreSQL:** Todas las operaciones CRUD (crear, leer, actualizar, eliminar) sobre usuarios, tareas y recordatorios se persisten en base de datos relacional mediante la capa DAO (`TareaDAOImpl`, `RecordatorioDAOImpl`, `UsuarioDAOImpl`, `ElementoCompartidoDAOImpl`).
+- **Visualización en ListView con colores por prioridad:** Las tareas y recordatorios se muestran en una lista con celdas personalizadas (`ElementoListCell`). El color de fondo indica la prioridad: rojo (ALTA), naranja (MEDIA) y verde (BAJA).
+- **Fecha y hora en recordatorios:** Los recordatorios almacenan fecha y hora límite (`LocalDateTime`), permitiendo programar recordatorios con precisión horaria.
+- **Compartir elementos entre usuarios:** Un usuario puede compartir cualquier tarea o recordatorio con otro usuario registrado, respetando el límite de elementos del destinatario.
+- **Control de membresía en tiempo real:** El sistema valida el límite de 3 elementos para `UsuarioClasico` tanto al crear como al recibir elementos compartidos.
+- **Concurrencia FORK/JOIN:** Al abrir el formulario de creación, `AutoGuardarThread` se activa en segundo plano (FORK) y se detiene al cerrar el formulario (JOIN).
+- **Documentación Javadoc:** Todas las clases activas del sistema están documentadas con el estándar Javadoc de Java.
 
-Además, se incorporará:
+---
 
-- **Programación concurrente o multihilo** para simular accesos simultáneos a tareas compartidas.
-- **Persistencia de datos con SQL Server** para almacenamiento y recuperación eficiente de la información.
-- **Gradle** como herramienta de gestión de dependencias y construcción del proyecto.
-- **JavaFX** para la interfaz gráfica final.
+## Tecnologías Utilizadas
+
+- **Java 17** con principios de Programación Orientada a Objetos (POO)
+- **JavaFX 21** para la interfaz gráfica (FXML + controladores)
+- **PostgreSQL** para la persistencia de datos
+- **Gradle** como herramienta de construcción y gestión de dependencias
+- **Programación multihilo** (patrón FORK/JOIN con `AutoGuardarThread`)
+- **Patrón Strategy** para el procesamiento de pagos
+
+---
 
 ## Estructura de Entregables
 
-El proyecto se desarrollará progresivamente en **tres entregables**:
+### 1. Modelado y Estructura Inicial ✅ Completado
+
+**Objetivo:** Definición de la arquitectura base del sistema.
+
+- Diseño aplicando abstracción, herencia, encapsulamiento y polimorfismo
+- Diagrama de clases y diagrama de objetos
+- Uso de clases abstractas e interfaces
+- Implementación inicial en Java con Gradle
+- Ejecución con datos estáticos en consola (sin interfaz gráfica)
 
 ---
 
-### 1. Modelado y Estructura Inicial
+### 2. Comportamiento del Sistema y Concurrencia ✅ Completado
 
-En esta fase se definirá la arquitectura base del sistema.
+**Objetivo:** Incorporar comportamiento dinámico, patrones de diseño y procesamiento multihilo.
 
-Incluye:
-
-- Diseño del sistema aplicando **principios de POO**.
-- **Diagrama de clases** con:
-  - Herencia
-  - Polimorfismo
-  - Encapsulamiento
-  - Abstracción
-- Uso de **clases abstractas** e **interfaces**.
-- **Diagrama de objetos**.
-- Implementación inicial en **Java usando Gradle**.
-- Ejecución del sistema **en consola**.
-- **No incluye interfaz gráfica**.
+- **Patrón Strategy** para desacoplar las pasarelas de pago (`TarjetaCredito`, `TarjetaDebito`, `Paypal`)
+- **Hilos (Threads):** clase `AutoGuardarThread` que simula un daemon de autoguardado asíncrono
+- Flujo interactivo de autenticación y captura de datos por consola
+- Diagramas de secuencia y actividad
+- Aplicación funcionando en consola
 
 ---
 
-### 2. Comportamiento del Sistema y Concurrencia
+### 3. Interfaz Gráfica y Persistencia ✅ Fase Actual
 
-En esta fase se ampliará el diseño incorporando comportamiento avanzado del sistema.
+**Objetivo:** Migración hacia entorno visual GUI con persistencia relacional en PostgreSQL.
 
-Incluye:
-
-- Extensión del diseño para incorporar **patrones de diseño** y **concurrencia**.
-- **Actualización del diagrama de clases** y uso de patrones.
-- **Diagramas de secuencia y actividad** para la gestión de tareas.
-- Implementación en Java de:
-  - **Patrones de diseño**
-  - **Hilos (Threads)** para accesos concurrentes a tareas compartidas.
-- La aplicación **continúa funcionando en consola**.
+- Interfaz gráfica completa con **JavaFX** (login, registro, pantalla principal)
+- Conexión a **PostgreSQL** para gestionar usuarios, tareas y recordatorios
+- Visualización de elementos en `ListView` con colores por prioridad
+- Diferenciación visual entre tareas `[T]` y recordatorios `[R]`
+- Compartir elementos entre usuarios registrados
+- Control de límite de elementos para `UsuarioClasico` (máximo 3)
+- Documentación Javadoc generada para todas las clases activas
 
 ---
 
-### 3. Interfaz Gráfica y Persistencia
+## Patrones de Diseño e Hilos Aplicados
 
-Fase final del proyecto con interfaz visual y almacenamiento de datos.
+### Patrón Strategy
 
-Incluye:
+La clase abstracta `Usuario` delega la responsabilidad del pago a la interfaz `FormaPago`, permitiendo intercambiar el método de cobro en tiempo de ejecución:
 
-- Implementación final con **interfaz gráfica y persistencia de datos**.
-- Actualización del **diagrama de clases** si se agregan componentes de interfaz o persistencia.
-- Conexión a **SQL Server** para gestionar:
-  - Usuarios
-  - Tareas
-  - Recordatorios
-- Desarrollo de interfaz con **JavaFX**.
-- Visualización de tareas en **ListView**.
-- **Colores según prioridad** para tareas.
-- **Íconos para diferenciar recordatorios**.
+- `TarjetaDebito`
+- `TarjetaCredito`
+- `Paypal`
 
-- ## Guía de uso del proyecto en JAVA
+### Concurrencia (FORK/JOIN con AutoGuardarThread)
 
-- A continuación se explicara como hacer uso correcto del programa:
+Al abrir el formulario de creación de una tarea o recordatorio, el sistema realiza un **FORK** dividiendo el flujo de ejecución:
 
-- 1 - Ingresar al link proporcionado mediante el envio del entregable 1.
-- 2 - Copiar el link del repositorio y clonarlo a través de la terminal o por medio de Git.
-- 3 - Al momento de abrir el proyecto en IntelliJ IDEA es necesario hacer uso del OpenJDK 17.0.12.
-- 3 - Por medio del uso de graddle realizar la construcción del ejecutable del programa.
-- 4 - Usar graddle run para ejecutar el archivo ejecutable del programa, esto permitira ver el funcionamiento.
-- 5 - El programa no pide la entrada de datos al usuario, ya que el programa funciona usando datos predefinidos por los desarrolladores.
-- 6 - Una vez terminado de usar el programa solo es necesario salir del proyecto.
+- **Hilo Principal:** muestra el formulario modal y espera la interacción del usuario.
+- **Hilo Secundario (`AutoGuardarThread`):** corre de forma asíncrona en segundo plano, ejecutando una rutina de autoguardado cada 5 segundos.
+- Al cerrar el formulario se realiza el **JOIN**: el hilo secundario recibe la señal de parada y termina de forma controlada.
+
+---
+
+## Requisitos Previos
+
+1. **Java 17** instalado (OpenJDK 17 o superior)
+2. **PostgreSQL** instalado y en ejecución
+3. **Gradle** (incluido via wrapper `gradlew`)
+
+### Configuración de la Base de Datos
+
+Crear la base de datos y las tablas ejecutando el script SQL del repositorio en PostgreSQL:
+
+```
+Base de datos : ProyectoPOO
+Usuario       : postgres
+Contraseña    : Luis0729
+Puerto        : 5432 (por defecto)
+```
+
+---
+
+## Guía de Uso del Proyecto
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <URL_DEL_REPOSITORIO>
+```
+
+### 2. Configurar el entorno
+
+Abrir el proyecto en VS Code o IntelliJ IDEA con **Java 17** como SDK del proyecto.
+
+### 3. Construir el proyecto
+
+```bash
+./gradlew build
+```
+
+En Windows (PowerShell):
+
+```powershell
+.\gradlew.bat build
+```
+
+### 4. Ejecutar la aplicación
+
+```bash
+./gradlew run
+```
+
+En Windows (PowerShell):
+
+```powershell
+.\gradlew.bat run
+```
+
+Esto abrirá la ventana de **inicio de sesión** de la aplicación.
+
+---
+
+## Indicaciones Específicas para Pruebas
+
+### A. Registro de usuario
+
+1. En la pantalla de login, hacer clic en **"Registrarse"**
+2. Completar los campos:
+   - **Nombre:** texto libre (ej. `Carlos López`)
+   - **Correo:** formato `usuario@dominio.com` (ej. `carlos@mail.com`)
+   - **Contraseña:** texto libre (mínimo recomendado: 6 caracteres)
+   - **Tipo de cuenta:** `Clásico` (límite de 3 elementos) o `Premium`
+   - Si elige **Premium**, debe seleccionar un método de pago y completar los datos correspondientes
+3. Hacer clic en **"Registrar"**
+
+### B. Inicio de sesión
+
+1. Ingresar el correo y contraseña del usuario registrado
+2. Hacer clic en **"Iniciar sesión"**
+3. Si los datos son correctos, se accede a la pantalla principal con la lista de elementos
+
+### C. Crear una tarea
+
+1. En la pantalla principal, hacer clic en **"Nueva Tarea"**
+2. Completar el formulario:
+   - **Título:** obligatorio (ej. `Diseñar diagramas UML`)
+   - **Descripción:** opcional (ej. `Actualizar diagramas de secuencia`)
+   - **Prioridad:** seleccionar entre `ALTA`, `MEDIA` o `BAJA`
+   - **Fecha límite:** seleccionar una fecha futura en el calendario
+3. Hacer clic en **"Guardar"**
+
+> La tarea aparecerá en la lista con el prefijo **[T]** y el color de fondo según su prioridad.
+
+### D. Crear un recordatorio
+
+1. Hacer clic en **"Nuevo Recordatorio"**
+2. Completar el formulario:
+   - **Título:** obligatorio
+   - **Descripción:** opcional
+   - **Prioridad:** seleccionar entre `ALTA`, `MEDIA` o `BAJA`
+   - **Fecha límite:** seleccionar una fecha futura en el calendario
+   - **Hora (HH:mm):** ingresar la hora en formato de 24 horas (ej. `14:30`). Por defecto se carga la hora actual.
+3. Hacer clic en **"Guardar Recordatorio"**
+
+> El recordatorio aparecerá en la lista con el prefijo **[R]**.
+
+### E. Editar o eliminar un elemento
+
+- Cada elemento en la lista tiene botones **"Editar"** y **"Eliminar"** integrados.
+- Para las tareas, también aparece el botón **"Cambiar estado"** (PENDIENTE → EN_PROGRESO → COMPLETADA → CANCELADA).
+- Para los recordatorios, aparece el botón **"Reprogramar"** para cambiar la fecha y hora.
+
+### F. Compartir un elemento
+
+1. Seleccionar un elemento de la lista haciendo clic sobre él
+2. Hacer clic en el botón **"Compartir"**
+3. Seleccionar el usuario destino del listado
+4. Confirmar
+
+> Si el usuario destino es `UsuarioClasico` y ya alcanzó su límite de 3 elementos, el sistema bloqueará el compartir y mostrará una advertencia.
+
+### G. Validación del límite (UsuarioClasico)
+
+Intentar crear un 4.° elemento con una cuenta de tipo `UsuarioClasico`. El sistema bloqueará la operación y mostrará: *"Alcanzaste el límite de elementos permitidos para tu cuenta Clásica."*
+
+---
+
+## Ejemplos Prácticos
+
+### Flujo de creación de tarea (UsuarioClasico)
+
+| Paso | Acción | Resultado esperado |
+|------|--------|--------------------|
+| 1 | Login con `carlos@mail.com` | Pantalla principal: "Hola, Carlos" / "Clásico" |
+| 2 | Clic en "Nueva Tarea" | Se abre formulario modal + `AutoGuardarThread` activo en segundo plano |
+| 3 | Título: `Revisar código`, Prioridad: `ALTA`, Fecha: futura | Formulario válido |
+| 4 | Clic en "Guardar" | Tarea guardada en BD, aparece en lista con fondo rojo y prefijo [T] |
+| 5 | Intentar crear un 4.° elemento | Sistema bloquea y muestra advertencia de límite |
+
+### Flujo de compartir elemento
+
+| Paso | Acción | Resultado esperado |
+|------|--------|--------------------|
+| 1 | Seleccionar una tarea de la lista | Elemento resaltado |
+| 2 | Clic en "Compartir" | Diálogo con lista de usuarios disponibles |
+| 3 | Seleccionar usuario destino | Confirmación: "Compartido con [nombre] correctamente." |
+| 4 | El usuario destino inicia sesión | El elemento aparece también en su lista |
+
+---
+
+## Generación de Documentación Javadoc
+
+Para generar la documentación HTML del proyecto:
+
+```powershell
+.\gradlew.bat javadoc
+```
+
+La documentación se genera en `C:\javadoc-proyectopoo\index.html` y puede abrirse en cualquier navegador web.
+
+Para abrirla directamente desde la terminal:
+
+```powershell
+start C:\javadoc-proyectopoo\index.html
+```
