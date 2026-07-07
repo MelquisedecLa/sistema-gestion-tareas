@@ -3,8 +3,8 @@ package sistemagestiontareas.persistence;
 import sistemagestiontareas.enums.Prioridad;
 import sistemagestiontareas.model.Recordatorio;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,7 +35,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
             ps.setString(1, recordatorio.getTitulo());
             ps.setString(2, recordatorio.getDescripcion());
             ps.setString(3, recordatorio.getPrioridad().name());
-            ps.setTimestamp(4, Timestamp.valueOf(recordatorio.getFechaLimite()));
+            ps.setDate(4, Date.valueOf(recordatorio.getFechaLimite()));
             ps.setInt(5, usuarioId);
             ps.executeUpdate();
 
@@ -115,7 +115,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
             ps.setString(1, recordatorio.getTitulo());
             ps.setString(2, recordatorio.getDescripcion());
             ps.setString(3, recordatorio.getPrioridad().name());
-            ps.setTimestamp(4, Timestamp.valueOf(recordatorio.getFechaLimite()));
+            ps.setDate(4, Date.valueOf(recordatorio.getFechaLimite()));
             ps.setInt(5, recordatorio.getId());
             return ps.executeUpdate() > 0;
         }
@@ -170,7 +170,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
         String    titulo      = rs.getString("titulo");
         String    descripcion = rs.getString("descripcion");
         Prioridad prioridad   = Prioridad.valueOf(rs.getString("prioridad"));
-        java.time.LocalDateTime fechaLimite = rs.getTimestamp("fecha_limite").toLocalDateTime();
+        java.time.LocalDate fechaLimite = rs.getDate("fecha_limite").toLocalDate();
         return new Recordatorio(id, titulo, descripcion, prioridad, fechaLimite);
     }
 }

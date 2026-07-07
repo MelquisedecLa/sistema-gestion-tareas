@@ -7,6 +7,15 @@ plugins {
 group = 'org.example'
 version = '1.0'
 
+layout.buildDirectory = file("C:/build-proyectopoo")
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+    destinationDir = file("C:/javadoc-proyectopoo")
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)

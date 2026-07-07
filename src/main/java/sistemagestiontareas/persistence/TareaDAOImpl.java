@@ -4,8 +4,8 @@ import sistemagestiontareas.enums.Estado;
 import sistemagestiontareas.enums.Prioridad;
 import sistemagestiontareas.model.Tarea;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,7 +38,7 @@ public class TareaDAOImpl implements TareaDAO {
             ps.setString(1, tarea.getTitulo());
             ps.setString(2, tarea.getDescripcion());
             ps.setString(3, tarea.getPrioridad().name());
-            ps.setTimestamp(4, Timestamp.valueOf(tarea.getFechaLimite()));
+            ps.setDate(4, Date.valueOf(tarea.getFechaLimite()));
             ps.setInt(5, usuarioId);
             ps.setString(6, tarea.getEstado() != null ? tarea.getEstado().name() : Estado.PENDIENTE.name());
             ps.executeUpdate();
@@ -119,7 +119,7 @@ public class TareaDAOImpl implements TareaDAO {
             ps.setString(1, tarea.getTitulo());
             ps.setString(2, tarea.getDescripcion());
             ps.setString(3, tarea.getPrioridad().name());
-            ps.setTimestamp(4, Timestamp.valueOf(tarea.getFechaLimite()));
+            ps.setDate(4, Date.valueOf(tarea.getFechaLimite()));
             ps.setString(5, tarea.getEstado() != null ? tarea.getEstado().name() : null);
             ps.setInt(6, tarea.getId());
             return ps.executeUpdate() > 0;
@@ -191,7 +191,7 @@ public class TareaDAOImpl implements TareaDAO {
         Prioridad prioridad   = Prioridad.valueOf(rs.getString("prioridad"));
         Estado    estado      = Estado.valueOf(rs.getString("estado") != null
                                     ? rs.getString("estado") : "PENDIENTE");
-        java.time.LocalDateTime fechaLimite = rs.getTimestamp("fecha_limite").toLocalDateTime();
+        java.time.LocalDate fechaLimite = rs.getDate("fecha_limite").toLocalDate();
         return new Tarea(id, titulo, descripcion, prioridad, estado, fechaLimite);
     }
 }

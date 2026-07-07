@@ -233,15 +233,15 @@ public class DashboardView extends BorderPane {
 
             try {
                 if (esTarea) {
-                    Tarea borrador = new Tarea(0, tituloTexto, descripcion, prioridad, Estado.PENDIENTE, fecha.atStartOfDay());
+                    Tarea borrador = new Tarea(0, tituloTexto, descripcion, prioridad, Estado.PENDIENTE, fecha);
                     int id = tareaDAO.guardar(borrador, usuarioActual.getId());
-                    Tarea tarea = new Tarea(id, tituloTexto, descripcion, prioridad, Estado.PENDIENTE, fecha.atStartOfDay());
+                    Tarea tarea = new Tarea(id, tituloTexto, descripcion, prioridad, Estado.PENDIENTE, fecha);
                     usuarioActual.crearElemento(tarea);
                     elementosObservable.add(tarea);
                 } else {
-                    Recordatorio borrador = new Recordatorio(0, tituloTexto, descripcion, prioridad, fecha.atStartOfDay());
+                    Recordatorio borrador = new Recordatorio(0, tituloTexto, descripcion, prioridad, fecha);
                     int id = recordatorioDAO.guardar(borrador, usuarioActual.getId());
-                    Recordatorio rec = new Recordatorio(id, tituloTexto, descripcion, prioridad, fecha.atStartOfDay());
+                    Recordatorio rec = new Recordatorio(id, tituloTexto, descripcion, prioridad, fecha);
                     usuarioActual.crearElemento(rec);
                     elementosObservable.add(rec);
                 }
@@ -297,7 +297,7 @@ public class DashboardView extends BorderPane {
         dialogo.setTitle("Reprogramar recordatorio");
         dialogo.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        DatePicker selectorFecha = new DatePicker(recordatorio.getFechaLimite().toLocalDate());
+        DatePicker selectorFecha = new DatePicker(recordatorio.getFechaLimite());
         VBox contenido = new VBox(10,
                 new Label("Nueva fecha para: " + recordatorio.getTitulo()), selectorFecha);
         contenido.setPadding(new Insets(20));
@@ -315,7 +315,7 @@ public class DashboardView extends BorderPane {
         Optional<ButtonType> resultado = dialogo.showAndWait();
         if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
             LocalDate nuevaFecha = selectorFecha.getValue();
-            recordatorio.reprogramarFecha(nuevaFecha.atStartOfDay());
+            recordatorio.reprogramarFecha(nuevaFecha);
             try {
                 recordatorioDAO.actualizar(recordatorio);
                 listaElementos.refresh();
