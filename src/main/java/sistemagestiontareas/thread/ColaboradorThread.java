@@ -47,7 +47,7 @@ public class ColaboradorThread extends Thread {
             }
         }
 
-        System.out.println("🏁 " + usuario.getNombre() + " terminó de colaborar en la tarea.");
+        System.out.println(usuario.getNombre() + " terminó de colaborar en la tarea.");
     }
 
     private void cambiarEstado() {
@@ -68,13 +68,13 @@ public class ColaboradorThread extends Thread {
         tarea.operacionConcurrente("Actualizando descripción", usuario);
         tarea.setDescripcion(nuevaDesc);
 
-        System.out.println("   ✓ " + usuario.getNombre() + " actualizó la descripción");
+        System.out.println(usuario.getNombre() + " actualizó la descripción");
     }
 
     private void verTarea() {
         tarea.operacionConcurrente("Visualizando tarea", usuario);
 
-        System.out.println("   📋 " + usuario.getNombre() + " visualizó la tarea");
+        System.out.println("      " + usuario.getNombre() + " visualizó la tarea");
         System.out.println("      Título: " + tarea.getTitulo());
         System.out.println("      Estado: " + tarea.getEstado());
         System.out.println("      Colaboradores: " + tarea.getCantidadColaboradores());
