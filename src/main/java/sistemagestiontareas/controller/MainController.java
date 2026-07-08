@@ -28,6 +28,7 @@ import sistemagestiontareas.model.Tarea;
 import sistemagestiontareas.model.Usuario;
 import sistemagestiontareas.model.UsuarioClasico;
 import sistemagestiontareas.model.UsuarioPremium;
+import sistemagestiontareas.thread.NotificadorThread;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -46,6 +47,7 @@ public class MainController {
     private final RecordatorioDAO recordatorioDAO = new RecordatorioDAOImpl();
     private final UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
     private final ElementoCompartidoDAO compartidoDAO = new ElementoCompartidoDAOImpl();
+    private NotificadorThread notificador;
 
     @FXML
     public void initialize() {
@@ -56,6 +58,9 @@ public class MainController {
         labelTipoUsuario.setText(usuario instanceof UsuarioPremium ? "Premium" : "Clásico");
 
         cargarElementosDesdeBD(usuario.getId());
+
+        notificador = new NotificadorThread(usuario.getId());
+        notificador.start();
 
         listViewElementos.setItems(elementos);
         listViewElementos.setCellFactory(lv -> new ElementoListCell(
@@ -374,6 +379,7 @@ public class MainController {
 
     @FXML
     private void onCerrarSesion() {
+        if (notificador != null) notificador.detener();
         Sesion.cerrarSesion();
         try {
             App.cambiarEscena("login.fxml", "Iniciar Sesión");

@@ -1,0 +1,13 @@
+# pack-refs with: peeled fully-peeled sorted 
+1a23f95648bc3c55e4aeb39c063e9fb6d1d5ca26 refs/heads/develop
+f0643a4e0dabc355eae1f99a99146e89a510290b refs/heads/feature/agregar-hiloAutoGuardar
+6c9ce5cdc744c84c13e08f72238446497338b87e refs/heads/feature/dataBase
+04df6afab7cb6008439442208da40c313454880a refs/heads/feature/elementos
+821205eacbba3526304e67bde472cad9c00c9898 refs/heads/feature/enums
+53c241effbeaf49cf241eb415923b30c3bd9ab51 refs/heads/feature/interfaces
+3999c84827ab7bf02a63dbed28fc250e0844e418 refs/heads/feature/main-datos
+fe86ef1f674d8cc6d628e6f4def05903030e3298 refs/heads/feature/ui
+f18bca825b7db6f1128088b79cc0eee015e176db refs/heads/feature/usuarios
+87872270621a738265bc33bf7dedaf7c21707fac refs/heads/feedback
+b486aaf74bb88df38163970f7c977b36da817fab refs/heads/hotfix/Cambio-de-ubicación-de-Main
+9deb6c2d1b1376fff6fef322c429c3ffeecf579d refs/heads/main
