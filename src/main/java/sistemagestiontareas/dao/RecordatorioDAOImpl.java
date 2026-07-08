@@ -41,7 +41,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
     @Override
     public Recordatorio buscarPorId(int id) {
         Connection con = conexion.getConexion();
-        String sql = "SELECT * FROM elementos WHERE id = ? AND tipo_elemento = 'RECORDATORIO'";
+        String sql = "SELECT * FROM elementos WHERE id = ? AND tipo_elemento = 'RECORDATORIO' AND activo = true";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -56,7 +56,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
     @Override
     public List<Recordatorio> buscarPorUsuario(int usuarioId) {
         Connection con = conexion.getConexion();
-        String sql = "SELECT * FROM elementos WHERE usuario_id = ? AND tipo_elemento = 'RECORDATORIO'";
+        String sql = "SELECT * FROM elementos WHERE usuario_id = ? AND tipo_elemento = 'RECORDATORIO' AND activo = true";
         List<Recordatorio> recordatorios = new ArrayList<>();
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -75,7 +75,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
     @Override
     public List<Recordatorio> buscarTodos() {
         Connection con = conexion.getConexion();
-        String sql = "SELECT * FROM elementos WHERE tipo_elemento = 'RECORDATORIO'";
+        String sql = "SELECT * FROM elementos WHERE tipo_elemento = 'RECORDATORIO' AND activo = true";
         List<Recordatorio> recordatorios = new ArrayList<>();
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -94,7 +94,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
     public boolean actualizar(Recordatorio recordatorio) {
         Connection con = conexion.getConexion();
         String sql = "UPDATE elementos SET titulo = ?, descripcion = ?, prioridad = ?, fecha_limite = ? " +
-                "WHERE id = ? AND tipo_elemento = 'RECORDATORIO'";
+                "WHERE id = ? AND tipo_elemento = 'RECORDATORIO' AND activo = true";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, recordatorio.getTitulo());
@@ -112,7 +112,7 @@ public class RecordatorioDAOImpl implements RecordatorioDAO {
     @Override
     public boolean eliminar(int id) {
         Connection con = conexion.getConexion();
-        String sql = "DELETE FROM elementos WHERE id = ? AND tipo_elemento = 'RECORDATORIO'";
+        String sql = "UPDATE elementos SET activo = false WHERE id = ? AND tipo_elemento = 'RECORDATORIO'";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);

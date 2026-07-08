@@ -94,3 +94,9 @@
     -fx-text-fill: #3b2f2a;
     -fx-font-weight: bold;
 }
+.dialog-pane:confirmation .button-bar .button:default {
+    -fx-background-color: #b3453d;
+}
+.dialog-pane:confirmation .button-bar .button:default:hover {
+    -fx-background-color: #942f28;
+}

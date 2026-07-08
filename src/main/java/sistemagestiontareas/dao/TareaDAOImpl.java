@@ -6,7 +6,6 @@ import sistemagestiontareas.enums.Prioridad;
 import sistemagestiontareas.model.Tarea;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class TareaDAOImpl implements TareaDAO {
     @Override
     public Tarea buscarPorId(int id) {
         Connection con = conexion.getConexion();
-        String sql = "SELECT * FROM elementos WHERE id = ? AND tipo_elemento = 'TAREA'";
+        String sql = "SELECT * FROM elementos WHERE id = ? AND tipo_elemento = 'TAREA' AND activo = true";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -59,7 +58,7 @@ public class TareaDAOImpl implements TareaDAO {
     @Override
     public List<Tarea> buscarPorUsuario(int usuarioId) {
         Connection con = conexion.getConexion();
-        String sql = "SELECT * FROM elementos WHERE usuario_id = ? AND tipo_elemento = 'TAREA'";
+        String sql = "SELECT * FROM elementos WHERE usuario_id = ? AND tipo_elemento = 'TAREA' AND activo = true";
         List<Tarea> tareas = new ArrayList<>();
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -78,7 +77,7 @@ public class TareaDAOImpl implements TareaDAO {
     @Override
     public List<Tarea> buscarTodos() {
         Connection con = conexion.getConexion();
-        String sql = "SELECT * FROM elementos WHERE tipo_elemento = 'TAREA'";
+        String sql = "SELECT * FROM elementos WHERE tipo_elemento = 'TAREA' AND activo = true";
         List<Tarea> tareas = new ArrayList<>();
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -97,7 +96,7 @@ public class TareaDAOImpl implements TareaDAO {
     public boolean actualizar(Tarea tarea) {
         Connection con = conexion.getConexion();
         String sql = "UPDATE elementos SET titulo = ?, descripcion = ?, prioridad = ?, fecha_limite = ?, estado = ? " +
-                "WHERE id = ? AND tipo_elemento = 'TAREA'";
+                "WHERE id = ? AND tipo_elemento = 'TAREA' AND activo = true";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, tarea.getTitulo());
@@ -116,7 +115,7 @@ public class TareaDAOImpl implements TareaDAO {
     @Override
     public boolean actualizarEstado(int id, Estado estado) {
         Connection con = conexion.getConexion();
-        String sql = "UPDATE elementos SET estado = ? WHERE id = ? AND tipo_elemento = 'TAREA'";
+        String sql = "UPDATE elementos SET estado = ? WHERE id = ? AND tipo_elemento = 'TAREA' AND activo = true";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, estado.name());
@@ -131,7 +130,7 @@ public class TareaDAOImpl implements TareaDAO {
     @Override
     public boolean eliminar(int id) {
         Connection con = conexion.getConexion();
-        String sql = "DELETE FROM elementos WHERE id = ? AND tipo_elemento = 'TAREA'";
+        String sql = "UPDATE elementos SET activo = false WHERE id = ? AND tipo_elemento = 'TAREA'";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);

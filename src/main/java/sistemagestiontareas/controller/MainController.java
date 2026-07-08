@@ -230,6 +230,17 @@ public class MainController {
     }
 
     private void eliminarElemento(Elemento elemento) {
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar eliminación");
+        confirmacion.setHeaderText(null);
+        confirmacion.setContentText("¿Seguro que quieres eliminar \"" + elemento.getTitulo() + "\"? Esta acción no se puede deshacer.");
+        aplicarEstilo(confirmacion);
+
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isEmpty() || resultado.get() != ButtonType.OK) {
+            return;
+        }
+
         try {
             boolean eliminado = (elemento instanceof Tarea)
                     ? tareaDAO.eliminar(elemento.getId())

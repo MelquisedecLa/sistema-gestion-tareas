@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
 
 public class App extends Application {
 
@@ -12,6 +13,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stagePrincipal = stage;
+        stagePrincipal.getIcons().add(new Image(getClass().getResourceAsStream("icons/app_icon.png")));
         cambiarEscena("login.fxml", "Iniciar Sesión");
     }
 
